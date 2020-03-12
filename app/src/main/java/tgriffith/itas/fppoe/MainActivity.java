@@ -3,11 +3,16 @@ package tgriffith.itas.fppoe;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActionBar;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -31,17 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    // stores the league selected from the spinner
+    private String selectedLeague = "Standard";
 
-    private String ladderUrl = "https://api.pathofexile.com/ladders/Metamorph?limit=50";
-    private String leagueUrl = "https://api.pathofexile.com/leagues?type=main";
-
-    /**
-     * TODO: Add league info from populate spinner into the spinner.
-     * TODO: Search ladder depending on league selected. Select size of leaderboard to show.
-     *
-     * */
-    // store the leagues for spinner
-    //List<String> leagueSpinner = new ArrayList<String>();
+    private String ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=50";
 
     // Buttons for requesting results, adding textViews, and clearing LL.
     private Button btnRequest;
@@ -65,33 +63,48 @@ public class MainActivity extends AppCompatActivity {
 
         queue = Volley.newRequestQueue(this);
 
-        // tablelayout for ladder
-        tl = (TableLayout) findViewById(R.id.TLWrapper);
+        request();
 
-        // on click of request button request from url
-        btnRequest = (Button) findViewById(R.id.requestButton);
-        btnRequest.setOnClickListener(new View.OnClickListener() {
+        // tablelayout for ladder
+        tl = findViewById(R.id.TLWrapper);
+
+        // Spinner element
+        Spinner spinner = findViewById(R.id.leagueSpinner);
+
+        String[] leagueChoices = new String[]{
+                "Standard", "Hardcore", "SSF Standard", "SSF Hardcore",
+                "Delirium", "Delirium Hardcore", "SSF Delirium", "SSF Delirium HC"
+        };
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, leagueChoices);
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View v) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                String league = parent.getItemAtPosition(position).toString();
+                selectedLeague = league;
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=50";
+                clearTl();
                 request();
             }
-        });
 
-        // clear the table layout
-        btnClear = (Button) findViewById(R.id.clearButton);
-        btnClear.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                clearTl();
+            public void onNothingSelected(AdapterView<?> parent) {
+                //Another interface callback
             }
         });
 
-        // populate spinner for leagues
-        populateSpinner();
+
     }
+
 
     public void request() {
 
+        Log.i("ladder", ladderUrl);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, ladderUrl, null, new Response.Listener<JSONObject>() {
 
@@ -135,6 +148,10 @@ public class MainActivity extends AppCompatActivity {
 
                 //Grab rank info
                 String rankVal = charAccData.getString("rank");
+                //Online status
+                String onlineVal = charAccData.getString("online");
+                // Death status
+                String deadVal = charAccData.getString("dead");
 
                 // Contains only the character portion of data.
                 JSONObject characters = charAccData.getJSONObject("character");
@@ -163,26 +180,36 @@ public class MainActivity extends AppCompatActivity {
                 // The textview storing rank on ladder
                 TextView rankTv = new TextView(this);
                 rankTv.setText(rankVal);
+                rankTv.setTextSize(16);
                 rankTv.setPadding(5,5,5,5);
+                if (onlineVal == "true") {
+                    rankTv.setBackgroundResource(android.R.color.holo_green_light);
+                } else if (deadVal == "true") {
+                    rankTv.setBackgroundResource(android.R.color.holo_red_light);
+                }
 
                 // Character name textview
                 TextView nameTv = new TextView(this);
                 nameTv.setText(nameVal);
+                nameTv.setTextSize(16);
                 nameTv.setPadding(5,5,5,5);
 
                 // Character level textview
                 TextView levelTv = new TextView(this);
                 levelTv.setText(levelVal);
+                levelTv.setTextSize(16);
                 levelTv.setPadding(5,5,5,5);
 
                 // Character level textview
                 TextView classTv = new TextView(this);
                 classTv.setText(classVal);
+                classTv.setTextSize(16);
                 classTv.setPadding(5,5,5,5);
 
-                TextView accNameTv = new TextView(this);
+                /*TextView accNameTv = new TextView(this);
                 accNameTv.setText(accNameVal);
-                accNameTv.setPadding(5,5,5,5);
+                accNameTv.setTextSize(15);
+                accNameTv.setPadding(5,5,5,5);*/
 
 
 
@@ -193,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                 row.addView(nameTv);
                 row.addView(levelTv);
                 row.addView(classTv);
-                row.addView(accNameTv);
+                //row.addView(accNameTv);
 
                 // Add the row
                 tl.addView(row, i);
@@ -206,38 +233,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     *  Use api to get list of active leagues, then add to spinner as options
-     * */
-    public void populateSpinner(){
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest
-                (Request.Method.GET, leagueUrl, null, new Response.Listener<JSONArray>() {
-
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        //Log.i("ladder", "Request" + response);
-                        try {
-                            //grab one league's information
-                            for (int i =0; i < response.length(); i++) {
-                                JSONObject leaguesJ = response.getJSONObject(i);
-                                String leagueId = leaguesJ.getString("id");
-
-                                Log.i("ladder", "League Test: " + leagueId);
-                            }
-
-                        } catch (JSONException e){
-
-                        }
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
-                        Log.i("ladder", "error :" + error.toString());
-                    }
-                });
-
-        queue.add(jsonArrayRequest);
-    }
 }
