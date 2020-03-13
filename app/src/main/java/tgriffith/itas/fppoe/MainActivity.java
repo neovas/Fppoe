@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     // stores the league selected from the spinner
     private String selectedLeague = "Standard";
 
-    private String ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=50";
+    private String ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
 
     // Buttons for requesting results, adding textViews, and clearing LL.
     private Button btnRequest;
@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         queue = Volley.newRequestQueue(this);
 
-        request();
+        //request();
 
         // tablelayout for ladder
         tl = findViewById(R.id.TLWrapper);
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String league = parent.getItemAtPosition(position).toString();
                 selectedLeague = league;
-                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=50";
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
                 clearTl();
                 request();
             }
@@ -103,7 +103,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void request() {
-
+        if (tl.getChildCount() < 1) {
+            clearTl();
+        }
         Log.i("ladder", ladderUrl);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, ladderUrl, null, new Response.Listener<JSONObject>() {
