@@ -6,7 +6,7 @@
 
     <TextView
         android:id="@+id/rankTextViewID"
-        android:layout_width="120sp"
+        android:layout_width="160sp"
         android:layout_height="50sp"
         android:layout_weight="1"
         android:text="1"

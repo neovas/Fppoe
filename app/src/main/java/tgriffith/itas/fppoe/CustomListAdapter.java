@@ -61,12 +61,13 @@ public class CustomListAdapter extends ArrayAdapter {
         infoTextField.setText(infoArray.get(position));
         rankTextField.setText(rankArray.get(position));
 
-        // TODO: Change this to change color of background is online or dead
-        if (deathArray.get(position).equals("true")) {
-            rankTextField.setBackgroundColor(Color.RED);
-        }
+        // Color code dead characters. Death status done second so you can see dead characters
+        // of online players.
         if (onlineArray.get(position).equals("true")) {
             rankTextField.setBackgroundColor((Color.GREEN));
+        }
+        if (deathArray.get(position).equals("true")) {
+            rankTextField.setBackgroundColor(Color.RED);
         }
 
         return rowView;

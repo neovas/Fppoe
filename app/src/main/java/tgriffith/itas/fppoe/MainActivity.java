@@ -2,12 +2,14 @@ package tgriffith.itas.fppoe;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -36,7 +38,6 @@ import java.util.ArrayList;
  * TODO:
  * 2. Use listView functions to detect if at bottom of screen, load more. Or
  * find alternative way to load more results. Left and right swipes?
- * 3. Search for specific character.
  */
 
 
@@ -53,7 +54,13 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue mRequestQueue;
     private StringRequest mStringRequest;
 
+    // Our beautiful listview
     ListView listView;
+    SearchView searchView;
+
+    // The searched accountName. This allows us to pass the accountName variable into
+    // tablePopulate when doing a search. This is due to lack of info in the account search json.
+    String searchedAccountName;
 
     // Stores the name, info and rank values which
     // are stored in the listView rows.
@@ -77,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Find the listView layout
         listView = findViewById(R.id.listViewID);
+        // find the searchView
+        searchView = findViewById(R.id.accountSearchID);
+
         // Create our custom adapter and provide it the arrays which will hold our ladder info
         clAdapter = new CustomListAdapter(this, nameArray, infoArray, rankArray, onlineStatusArray, deathStatusArray);
         //bind the two
@@ -131,6 +141,68 @@ public class MainActivity extends AppCompatActivity {
                 //Another interface callback
             }
         });
+
+        // searchVIew listener.
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            // When text is submitted in searchView query api for accountName characters.
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                /**
+                 * Clear the listView and then reset the arrays so
+                 * on league change only those entries are stored.
+                 * */
+                clAdapter.clear();
+                nameArray.clear();
+                infoArray.clear();
+                rankArray.clear();
+                deathStatusArray.clear();
+                onlineStatusArray.clear();
+
+                // store account name in our global variable for use in tablePopulate
+                searchedAccountName = query;
+
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + query + "&limit=200";
+                Log.i("ladder", "Searching for: " + query);
+                request();
+
+                return false;
+            }
+
+            /**
+             * Everytime text input changes this runs. If the query is empty then default to normal
+             * search of the league.
+             */
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if (TextUtils.isEmpty(newText)) {
+                    /**
+                     * Clear the listView and then reset the arrays so
+                     * on league change only those entries are stored.
+                     * */
+                    clAdapter.clear();
+                    nameArray.clear();
+                    infoArray.clear();
+                    rankArray.clear();
+                    deathStatusArray.clear();
+                    onlineStatusArray.clear();
+
+                    // assign values to ladderUrl again so it updates
+                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
+                    request();
+                }
+                return false;
+            }
+        });
+
+        // Make the entire area of the searchView clickable rather than just the magnifying glass.
+        searchView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchView.setIconified(false);
+            }
+        });
     }
 
     /**
@@ -146,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        //Log.i("ladder", "Request" + response);
+                        Log.i("ladder", "Request" + response);
                         tablePopulate(response);
                     }
                 }, new Response.ErrorListener() {
@@ -173,9 +245,10 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < entriesArray.length(); i++){
                 //Grab an entry of character + account from entries
                 JSONObject charAccData = entriesArray.getJSONObject(i);
-
+                Log.i("ladder", "CharAccData: " + charAccData);
                 //Grab rank info
                 String rankVal = charAccData.getString("rank");
+                Log.i("ladder", "RankVal: " + rankVal);
 
                 //Online status
                 String onlineVal = charAccData.getString("online");
@@ -187,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //Grab Name of Character on ladder
                 String nameVal = characters.getString("name");
+                Log.i("ladder", "Name: " + nameVal);
 
                 // Grab level of character
                 String levelVal = characters.getString("level");
@@ -197,10 +271,22 @@ public class MainActivity extends AppCompatActivity {
                 String expVal = characters.getString("experience");
 
                 // The account information paired with a character
-                JSONObject account = charAccData.getJSONObject("account");
+                JSONObject account;
+                String accNameVal;
 
-                // Account name
-                String accNameVal = account.getString("name");
+                /**
+                 *  Checking that our query contains an account object.
+                 *  This is used primarily for accountSearch
+                 * */
+                if (charAccData.has("account")) {
+                    account = charAccData.getJSONObject("account");
+                    Log.i("ladder", "Account value: " + account);
+                    // Account name
+                    accNameVal = account.getString("name");
+                } else {
+                    // Couldn't find account object so using the query value from the searchView
+                    accNameVal = searchedAccountName;
+                }
 
                 // Add to listView Row's information line the level, class and account name.
                 infoArray.add(levelVal + "  " + classVal + " - " + accNameVal);
@@ -208,7 +294,8 @@ public class MainActivity extends AppCompatActivity {
                 nameArray.add(nameVal);
                 deathStatusArray.add(deadVal);
                 onlineStatusArray.add(onlineVal);
-                Log.i("ladder", deadVal);
+
+                Log.i("ladder", accNameVal + " " + nameVal + " " + rankVal);
 
                 clAdapter.notifyDataSetChanged();
 

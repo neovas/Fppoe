@@ -9,7 +9,7 @@
     <Spinner
         android:id="@+id/leagueSpinner"
         android:layout_width="210dp"
-        android:layout_height="33dp"
+        android:layout_height="75dp"
         android:prompt="@string/spinner_title"
         android:spinnerMode="dropdown"
         android:textColor="#FF0000"
@@ -24,5 +24,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/leagueSpinner" />
+
+    <SearchView
+        android:id="@+id/accountSearchID"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/listViewID"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/leagueSpinner"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
