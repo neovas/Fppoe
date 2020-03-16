@@ -16,6 +16,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -36,8 +37,12 @@ import java.util.ArrayList;
 
 /**
  * TODO:
- * 2. Use listView functions to detect if at bottom of screen, load more. Or
- * find alternative way to load more results. Left and right swipes?
+ * 1. Use listView functions to detect if at bottom of screen, load more. All pull to refresh.
+ * 2. If account search doesn't find a result toast the user telling them.
+ * 3. In the event of not reply from api alert the user.
+ * 4. Select default league to load on launch.
+ * 5. Tap entry to view character's equipped gear, gems, etc.
+ * 6. Set favorite accounts/characters to follow?
  */
 
 
@@ -57,10 +62,17 @@ public class MainActivity extends AppCompatActivity {
     // Our beautiful listview
     ListView listView;
     SearchView searchView;
+    // swipe to refresh
+    // https://www.bignerdranch.com/blog/implementing-swipe-to-refresh-an-android-material-design-ui-pattern/
+    SwipeRefreshLayout mSwipeRefreshLayout;
+
 
     // The searched accountName. This allows us to pass the accountName variable into
     // tablePopulate when doing a search. This is due to lack of info in the account search json.
     String searchedAccountName;
+
+    // Flag representing if the user is searching for an account or doing regular ladder search
+    Boolean isAccountSearch = false;
 
     // Stores the name, info and rank values which
     // are stored in the listView rows.
@@ -86,11 +98,45 @@ public class MainActivity extends AppCompatActivity {
         listView = findViewById(R.id.listViewID);
         // find the searchView
         searchView = findViewById(R.id.accountSearchID);
+        // find swipe to refresh
+        mSwipeRefreshLayout = findViewById(R.id.activity_main_swipe_refresh_layout);
 
         // Create our custom adapter and provide it the arrays which will hold our ladder info
         clAdapter = new CustomListAdapter(this, nameArray, infoArray, rankArray, onlineStatusArray, deathStatusArray);
         //bind the two
         listView.setAdapter(clAdapter);
+
+        /**
+         * When swiping to refresh clear variables and refresh the ladder.
+         * */
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                /**
+                 * Clear the listView and then reset the arrays so
+                 * on league change only those entries are stored.
+                 * */
+                clAdapter.clear();
+                nameArray.clear();
+                infoArray.clear();
+                rankArray.clear();
+                deathStatusArray.clear();
+                onlineStatusArray.clear();
+
+                // Check whether we are refreshing a standard league result or an account search
+                if (isAccountSearch == false) {
+                    // assign values to ladderUrl again so it updates
+                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
+
+                } else {
+                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "&limit=200";
+
+                }
+                request();
+                // clears the refreshing icon after refreshing.
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         // Spinner element
         Spinner spinner = findViewById(R.id.leagueSpinner);
@@ -162,7 +208,10 @@ public class MainActivity extends AppCompatActivity {
                 // store account name in our global variable for use in tablePopulate
                 searchedAccountName = query;
 
-                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + query + "&limit=200";
+                // set accountSearch flag to true
+                isAccountSearch = true;
+
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "&limit=200";
                 Log.i("ladder", "Searching for: " + query);
                 request();
 
@@ -187,6 +236,9 @@ public class MainActivity extends AppCompatActivity {
                     rankArray.clear();
                     deathStatusArray.clear();
                     onlineStatusArray.clear();
+
+                    // not searching for an account name so reset account search flag to false
+                    isAccountSearch = false;
 
                     // assign values to ladderUrl again so it updates
                     ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
