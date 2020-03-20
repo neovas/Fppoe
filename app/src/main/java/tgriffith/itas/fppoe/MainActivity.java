@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -14,6 +15,7 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -37,9 +39,7 @@ import java.util.ArrayList;
 
 /**
  * TODO:
- * 1. Use listView functions to detect if at bottom of screen, load more. All pull to refresh.
  * 2. If account search doesn't find a result toast the user telling them.
- * 3. In the event of not reply from api alert the user.
  * 4. Select default league to load on launch.
  * 5. Tap entry to view character's equipped gear, gems, etc.
  * 6. Set favorite accounts/characters to follow?
@@ -50,7 +50,13 @@ public class MainActivity extends AppCompatActivity {
     // stores the league selected from the spinner
     private String selectedLeague = "Standard";
 
-    private String ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
+    // Offset for ladder searches.
+    int ladderOffset = 0;
+
+    // the lowest spot visible on ladder. 15k at moment of programming.
+    int ladderMaxSize = 15000;
+
+    private String ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200&offset=" + ladderOffset;
 
     // Buttons for requesting results, adding textViews, and clearing LL.
     private Button btnRequest;
@@ -73,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Flag representing if the user is searching for an account or doing regular ladder search
     Boolean isAccountSearch = false;
+
 
     // Stores the name, info and rank values which
     // are stored in the listView rows.
@@ -126,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 // Check whether we are refreshing a standard league result or an account search
                 if (isAccountSearch == false) {
                     // assign values to ladderUrl again so it updates
-                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
+                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200&offset=" + ladderOffset;
 
                 } else {
                     ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "&limit=200";
@@ -178,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // assign values to ladderUrl again so it updates
-                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200&offset=" + ladderOffset;
                 request();
             }
 
@@ -211,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                 // set accountSearch flag to true
                 isAccountSearch = true;
 
-                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "&limit=200";
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "?limit=200&offset=" + ladderOffset;
                 Log.i("ladder", "Searching for: " + query);
                 request();
 
@@ -241,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                     isAccountSearch = false;
 
                     // assign values to ladderUrl again so it updates
-                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200";
+                    ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200&offset=" + ladderOffset;
                     request();
                 }
                 return false;
@@ -255,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
                 searchView.setIconified(false);
             }
         });
+
     }
 
     /**
@@ -277,8 +285,14 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // TODO: Handle error
                         Log.i("ladder", "error :" + error.toString());
+                        /**
+                         * Check for error 503 network response. This is the error thrown when
+                         * game/website is down. Toast the user telling them servers cannot be reached.
+                         * */
+                        if (error.networkResponse.statusCode == 503) {
+                            Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
 

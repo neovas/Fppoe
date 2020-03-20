@@ -34,6 +34,7 @@ public class CustomListAdapter extends ArrayAdapter {
     // store death status
     private final ArrayList<String> deathArray;
 
+
     public CustomListAdapter(Activity context, ArrayList<String> nameArrayParam, ArrayList<String> infoArrayParam, ArrayList<String> rankArrayParam,
                              ArrayList<String> onlineArrayParam, ArrayList<String> deathArrayParam) {
 
