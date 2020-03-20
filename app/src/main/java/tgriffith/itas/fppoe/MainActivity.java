@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                 // set accountSearch flag to true
                 isAccountSearch = true;
 
-                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "?limit=200&offset=" + ladderOffset;
+                ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?accountName=" + searchedAccountName + "&limit=200";
                 Log.i("ladder", "Searching for: " + query);
                 request();
 
