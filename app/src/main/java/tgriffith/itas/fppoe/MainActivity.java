@@ -1,5 +1,6 @@
 package tgriffith.itas.fppoe;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     // tablePopulate when doing a search. This is due to lack of info in the account search json.
     String searchedAccountName;
 
+
     // Flag representing if the user is searching for an account or doing regular ladder search
     Boolean isAccountSearch = false;
 
@@ -88,6 +90,11 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> rankArray = new ArrayList<String>();
     ArrayList<String> onlineStatusArray = new ArrayList<>();
     ArrayList<String> deathStatusArray = new ArrayList<>();
+
+    //Used for passing info on into the characterInfo activity
+    ArrayList<String> accountNameArray = new ArrayList<>();
+    ArrayList<String> characterLevelArray = new ArrayList<>();
+    ArrayList<String> characterClassArray = new ArrayList<>();
 
     // The customAdapter for our listview
     CustomListAdapter clAdapter;
@@ -129,6 +136,9 @@ public class MainActivity extends AppCompatActivity {
                 rankArray.clear();
                 deathStatusArray.clear();
                 onlineStatusArray.clear();
+                accountNameArray.clear();
+                characterClassArray.clear();
+                characterLevelArray.clear();
 
                 // Check whether we are refreshing a standard league result or an account search
                 if (isAccountSearch == false) {
@@ -173,6 +183,9 @@ public class MainActivity extends AppCompatActivity {
                 rankArray.clear();
                 deathStatusArray.clear();
                 onlineStatusArray.clear();
+                accountNameArray.clear();
+                characterClassArray.clear();
+                characterLevelArray.clear();
 
                 //grab the selected item from the spinner
                 String league = parent.getItemAtPosition(position).toString();
@@ -211,6 +224,9 @@ public class MainActivity extends AppCompatActivity {
                 rankArray.clear();
                 deathStatusArray.clear();
                 onlineStatusArray.clear();
+                accountNameArray.clear();
+                characterClassArray.clear();
+                characterLevelArray.clear();
 
                 // store account name in our global variable for use in tablePopulate
                 searchedAccountName = query;
@@ -243,6 +259,9 @@ public class MainActivity extends AppCompatActivity {
                     rankArray.clear();
                     deathStatusArray.clear();
                     onlineStatusArray.clear();
+                    accountNameArray.clear();
+                    characterClassArray.clear();
+                    characterLevelArray.clear();
 
                     // not searching for an account name so reset account search flag to false
                     isAccountSearch = false;
@@ -260,6 +279,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 searchView.setIconified(false);
+            }
+        });
+
+        // On click of item start CharacterInfo activity.
+        // Pass the accountName and characterName so we can call api to get detailed info on the
+        // character. Gems, gear, etc.
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // store the selected entry's character name and account name
+                String listRowName = nameArray.get(position);
+                String listRowAccount = accountNameArray.get(position);
+                String listRowLevel = characterLevelArray.get(position);
+                String listRowClass = characterClassArray.get(position);
+
+                // create our intent and pass the char name and acct names to our activity.
+                Intent characterIntent = new Intent(getApplicationContext(), CharacterInfo.class);
+                characterIntent.putExtra("characterName", listRowName);
+                characterIntent.putExtra("accountName", listRowAccount);
+                characterIntent.putExtra("characterLevel", listRowLevel);
+                characterIntent.putExtra("characterClass", listRowClass);
+
+                startActivity(characterIntent);
+
             }
         });
 
@@ -360,6 +403,10 @@ public class MainActivity extends AppCompatActivity {
                 nameArray.add(nameVal);
                 deathStatusArray.add(deadVal);
                 onlineStatusArray.add(onlineVal);
+                // This array will store account names for use in creating a new activity.
+                accountNameArray.add(accNameVal);
+                characterClassArray.add(classVal);
+                characterLevelArray.add(levelVal);
 
                 Log.i("ladder", accNameVal + " " + nameVal + " " + rankVal);
 
