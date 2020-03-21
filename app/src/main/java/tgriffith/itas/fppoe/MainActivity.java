@@ -160,8 +160,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Currently running leagues
         String[] leagueChoices = new String[]{
-                "Standard", "Hardcore", "SSF Standard", "SSF Hardcore",
-                "Delirium", "Hardcore Delirium", "SSF Delirium", "SSF Delirium HC"
+                "Delirium", "Hardcore Delirium", "SSF Delirium", "SSF Delirium HC",
+                "Standard", "Hardcore", "SSF Standard", "SSF Hardcore"
         };
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, leagueChoices);
