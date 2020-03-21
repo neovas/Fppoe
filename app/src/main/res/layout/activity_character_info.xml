@@ -32,81 +32,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <ScrollView
         android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:orientation="horizontal"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/classLevelTv">
-
-        <ImageView
-            android:id="@+id/itemImage"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_weight="1"
-            tools:srcCompat="@tools:sample/avatars[12]" />
+        app:layout_constraintTop_toBottomOf="@+id/classLevelTv"
+        app:layout_constraintVertical_bias="0.503">
 
         <LinearLayout
+            android:id="@+id/llItemsContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/classLevelTv" />
 
-            <TextView
-                android:id="@+id/itemName"
-                android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:text="itemName"
-                android:textSize="13sp" />
+    </ScrollView>
 
-            <TextView
-                android:id="@+id/itemIMods"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/itemEMods"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="itemExplicitMods"
-                android:textSize="13sp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="409dp"
-        android:layout_height="207dp"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
-
-        <ImageView
-            android:id="@+id/socketImage"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:layout_weight="1"
-            tools:srcCompat="@tools:sample/avatars" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/itemSocket"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="itemGem" />
-        </LinearLayout>
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
