@@ -92,6 +92,7 @@ public class CharacterInfo extends AppCompatActivity {
 
                         parseCharacterInfo(response);
                         itemArraySort();
+                        populateCharacterInfo();
 
                     }
                 }, new Response.ErrorListener() {
@@ -122,7 +123,122 @@ public class CharacterInfo extends AppCompatActivity {
     }
 
     public void populateCharacterInfo() {
-        
+
+        for (int i = 0; i < sortedList.size(); i++) {
+            /**
+             * Create the layouts and views for an item entry
+             * */
+            // The LL which contains the icon and item info
+            LinearLayout parent = new LinearLayout(getApplicationContext());
+            parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            parent.setOrientation(LinearLayout.HORIZONTAL);
+            parent.setPadding(0, 0, 0, 10);
+
+            // Add our parent ll to our grandpappy ll.
+            llWrapper.addView(parent);
+
+            // Stores the image icon
+            ImageView itemIconIv = new ImageView(getApplicationContext());
+            // The LL which holds the item information
+            LinearLayout childLl = new LinearLayout(getApplicationContext());
+            childLl.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            childLl.setOrientation(LinearLayout.VERTICAL);
+
+            // Add the child elements to our parent LL
+            parent.addView(itemIconIv);
+            parent.addView(childLl);
+
+            //The textviews for storing item info
+            TextView iName = new TextView(getApplicationContext());
+            TextView iIMods = new TextView(getApplicationContext());
+            TextView iEMods = new TextView(getApplicationContext());
+
+            Item item = sortedList.get(i);
+
+            // image icon url
+            String itemIcon = item.imageUrl;
+            // the json has backslashes that break url, this removes them.
+            itemIcon = itemIcon.replace("\\", "");
+            //Log.i("charInfo", itemIcon);
+
+            // Display the item name and item type
+            iName.setText(item.name + " " + item.getTypeLine());
+            // Add the name to the layout
+            childLl.addView(iName);
+
+            // Set dimensions of our image in dp
+            int widthHeightDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
+            itemIconIv.getLayoutParams().height = widthHeightDp;
+            itemIconIv.getLayoutParams().width = widthHeightDp;
+            // Loads image into imageview by url
+            Picasso.with(getApplicationContext()).load(itemIcon).into(itemIconIv);
+
+            /*
+             * IMPLICIT MODS: Add each mod if any to the layout
+             * */
+            JSONArray implicitMods = new JSONArray();
+            if (item.getImplicitMods().length() > 0) {
+                //The implicitMods
+                implicitMods = item.getImplicitMods();
+                //Log.i("charInfo", implicitMods.toString());
+
+
+                //Loop through the implicitMods
+                for (int j = 0; j < implicitMods.length(); j++) {
+                    // Set the text on first loop. Following loops append to it.
+                    if (j == 0) {
+                        try {
+                            iIMods.setText(implicitMods.get(j).toString());
+                        } catch (JSONException e) {
+                            Log.e("JSON", "Error: " + e);
+                        }
+
+                    } else {
+
+                        try {
+                            iIMods.append('\n' + implicitMods.get(j).toString());
+                        } catch (JSONException e) {
+                            Log.e("JSON", "Error: " + e);
+                        }
+
+                    }
+                }
+                // add the implicit mods to the layout
+                childLl.addView(iIMods);
+            }
+
+            /*
+             * EXPLICIT MODS: Add each mod if any at all to the layout.
+             * */
+            JSONArray explicitMods = new JSONArray();
+            if (item.getExplicitMods().length() > 0) {
+                explicitMods = item.getExplicitMods();
+                Log.i("charInfo", explicitMods.toString());
+
+
+                //Loop through the explicitMods
+                for (int j = 0; j < explicitMods.length(); j++) {
+                    // Set the text on first loop. Following loops append to it.
+                    if (i == 0) {
+                        try {
+                            iEMods.setText(explicitMods.get(j).toString() + '\n');
+                        } catch (JSONException e) {
+                            Log.e("JSON", "Error: " + e);
+                        }
+
+                    } else {
+                        try {
+                            iEMods.append(explicitMods.get(j).toString() + '\n');
+                        } catch (JSONException e) {
+                            Log.e("JSON", "Error: " + e);
+                        }
+                    }
+
+                }
+                // add the explicit mods to the layout
+                childLl.addView(iEMods);
+            }
+        }
     }
 
     /*
@@ -158,51 +274,10 @@ public class CharacterInfo extends AppCompatActivity {
                 itemType = itemInfo.getString("typeLine");
                 inventoryId = itemInfo.getString("inventoryId");
 
-                /**
-                 * Create the layouts and views for an item entry
-                 * */
-                // The LL which contains the icon and item info
-                LinearLayout parent = new LinearLayout(getApplicationContext());
-                parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                parent.setOrientation(LinearLayout.HORIZONTAL);
-
-                // Add our parent ll to our grandpappy ll.
-                llWrapper.addView(parent);
-
-                // Stores the image icon
-                ImageView itemIconIv = new ImageView(getApplicationContext());
-                // The LL which holds the item information
-                LinearLayout childLl = new LinearLayout(getApplicationContext());
-                childLl.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                childLl.setOrientation(LinearLayout.VERTICAL);
-
-                // Add the child elements to our parent LL
-                parent.addView(itemIconIv);
-                parent.addView(childLl);
-
-                //The textviews for storing item info
-                TextView iName = new TextView(getApplicationContext());
-                TextView iIMods = new TextView(getApplicationContext());
-                TextView iEMods = new TextView(getApplicationContext());
-
-
                 // image icon url
                 itemIcon = itemInfo.getString("icon");
                 // the json has backslashes that break url, this removes them.
                 itemIcon = itemIcon.replace("\\", "");
-                //Log.i("charInfo", itemIcon);
-
-                // Display the item name and item type
-                iName.setText(itemName + " " + itemType);
-                // Add the name to the layout
-                childLl.addView(iName);
-
-                // Set dimensions of our image in dp
-                int widthHeightDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-                itemIconIv.getLayoutParams().height = widthHeightDp;
-                itemIconIv.getLayoutParams().width = widthHeightDp;
-                // Loads image into imageview by url
-                Picasso.with(getApplicationContext()).load(itemIcon).into(itemIconIv);
 
                 /*
                  * IMPLICIT MODS: Add each mod if any to the layout
@@ -211,20 +286,7 @@ public class CharacterInfo extends AppCompatActivity {
                 if (itemInfo.has("implicitMods")) {
                     //The implicitMods
                     implicitMods = itemInfo.getJSONArray("implicitMods");
-                    //Log.i("charInfo", implicitMods.toString());
 
-
-                    //Loop through the implicitMods
-                    for (int j = 0; j < implicitMods.length(); j++) {
-                        // Set the text on first loop. Following loops append to it.
-                        if (j == 0) {
-                            iIMods.setText(implicitMods.get(j).toString());
-                        } else {
-                            iIMods.append('\n' + implicitMods.get(j).toString());
-                        }
-                    }
-                    // add the implicit mods to the layout
-                    childLl.addView(iIMods);
                 }
 
                 /*
@@ -235,25 +297,11 @@ public class CharacterInfo extends AppCompatActivity {
                     explicitMods = itemInfo.getJSONArray("explicitMods");
                     Log.i("charInfo", explicitMods.toString());
 
-
-                    //Loop through the explicitMods
-                    for (int i = 0; i < explicitMods.length(); i++) {
-                        // Set the text on first loop. Following loops append to it.
-                        if (i == 0) {
-                            iEMods.setText(explicitMods.get(i).toString() + '\n');
-                        } else {
-                            iEMods.append(explicitMods.get(i).toString() + '\n');
-                        }
-
-                    }
-                    // add the explicit mods to the layout
-                    childLl.addView(iEMods);
                 }
 
                 // Add the item to our itemArray so we can later sort the order of them by values
                 Item individualItem = new Item(itemIcon, itemName, itemType, explicitMods, implicitMods, inventoryId);
                 itemArray.add(individualItem);
-
 
                 // SOCKETED ITEMS PARSING
                 //JSONArray socketedItems = itemInfo.getJSONArray("socketedItems");
