@@ -26,6 +26,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+
 /**
  * This activity starts when a ladder entry is tapped. It gets the character and account name from
  * the mainactivity. It then queries the api for character specific info such as gear and gems.
@@ -35,6 +40,10 @@ public class CharacterInfo extends AppCompatActivity {
     // The charname and account selected from the ladder
     String charName;
     String acctName;
+
+    // Storing each item in this array.
+    ArrayList<Item> itemArray = new ArrayList<Item>();
+    ArrayList<Item> sortedList;
 
     private RequestQueue queue;
     // returns all item info for a specific character
@@ -81,7 +90,8 @@ public class CharacterInfo extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
 
-                        populateCharacterInfo(response);
+                        parseCharacterInfo(response);
+                        itemArraySort();
 
                     }
                 }, new Response.ErrorListener() {
@@ -111,7 +121,14 @@ public class CharacterInfo extends AppCompatActivity {
         queue.add(jsonObjectRequest);
     }
 
-    public void populateCharacterInfo(JSONObject response) {
+    public void populateCharacterInfo() {
+        
+    }
+
+    /*
+     * Breaks down the characterInfo JSON into Item objects which are then put into an arraylist.
+     * */
+    public void parseCharacterInfo(JSONObject response) {
         try {
             //Access the items array of the charInfo request
             JSONArray entriesArray = response.getJSONArray("items");
@@ -190,9 +207,10 @@ public class CharacterInfo extends AppCompatActivity {
                 /*
                  * IMPLICIT MODS: Add each mod if any to the layout
                  * */
+                JSONArray implicitMods = new JSONArray();
                 if (itemInfo.has("implicitMods")) {
                     //The implicitMods
-                    JSONArray implicitMods = itemInfo.getJSONArray("implicitMods");
+                    implicitMods = itemInfo.getJSONArray("implicitMods");
                     //Log.i("charInfo", implicitMods.toString());
 
 
@@ -212,8 +230,9 @@ public class CharacterInfo extends AppCompatActivity {
                 /*
                  * EXPLICIT MODS: Add each mod if any at all to the layout.
                  * */
+                JSONArray explicitMods = new JSONArray();
                 if (itemInfo.has("explicitMods")) {
-                    JSONArray explicitMods = itemInfo.getJSONArray("explicitMods");
+                    explicitMods = itemInfo.getJSONArray("explicitMods");
                     Log.i("charInfo", explicitMods.toString());
 
 
@@ -230,6 +249,11 @@ public class CharacterInfo extends AppCompatActivity {
                     // add the explicit mods to the layout
                     childLl.addView(iEMods);
                 }
+
+                // Add the item to our itemArray so we can later sort the order of them by values
+                Item individualItem = new Item(itemIcon, itemName, itemType, explicitMods, implicitMods, inventoryId);
+                itemArray.add(individualItem);
+
 
                 // SOCKETED ITEMS PARSING
                 //JSONArray socketedItems = itemInfo.getJSONArray("socketedItems");
@@ -262,4 +286,131 @@ public class CharacterInfo extends AppCompatActivity {
 
     }
 
+    /*
+     * Super inefficiently sorts items into order of Weapon, Offhand, Helm, etc.
+     * Simply just looping through the array of items and if it finds the type of item we want to
+     * have it adds it to our new arraylist. Then does another loop looking for another item.
+     *
+     * It works.
+     * */
+    public void itemArraySort() {
+
+        sortedList = new ArrayList<Item>();
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Weapon")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Offhand")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Helm")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("BodyArmour")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Gloves")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Boots")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Belt")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Amulet")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Ring")) {
+                sortedList.add(item);
+
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Ring2")) {
+                sortedList.add(item);
+
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Flask")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Weapon2")) {
+                sortedList.add(item);
+
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("Offhand2")) {
+                sortedList.add(item);
+
+            }
+        }
+
+        // Logging the list of sorted items
+        for (int i = 0; i < sortedList.size(); i++) {
+            Log.i("sort", "Sorted: " + sortedList.get(i).getInventoryId() + " " + i);
+        }
+    }
+
 }
+
+
