@@ -299,33 +299,69 @@ public class CharacterInfo extends AppCompatActivity {
 
                 }
 
+                /**
+                 * Find socketed jewels and/or gems
+                 * */
+                JSONArray socketedItems = new JSONArray();
+                if (itemInfo.has("socketedItems")) {
+                    socketedItems = itemInfo.getJSONArray("socketedItems");
+
+
+                    // check there are actual socketedItems and not an empty array.
+                    if (socketedItems.length() > 0) {
+
+                        String socketedItemName = "";
+                        String socketedItemType = "";
+                        String socketedItemInventoryId = "";
+                        String socketedItemIcon = "";
+                        // loop through all socketed items
+                        for (int x = 0; x < socketedItems.length(); x++) {
+                            //individual socketed item
+                            JSONObject socketedItemInfo = socketedItems.getJSONObject(x);
+
+                            // Checking for abyss jewels which will be handled like normal items
+                            if (socketedItemInfo.has("abyssJewel")) {
+
+
+                                socketedItemName = socketedItemInfo.getString("name");
+                                socketedItemType = socketedItemInfo.getString("typeLine");
+                                socketedItemInventoryId = "abyssJewel";
+                                // image icon url
+                                socketedItemIcon = socketedItemInfo.getString("icon");
+                                // the json has backslashes that break url, this removes them.
+                                socketedItemIcon = socketedItemIcon.replace("\\", "");
+
+                                /*
+                                 * IMPLICIT MODS: Add each mod if any to the layout
+                                 * */
+                                JSONArray socketedImplicitMods = new JSONArray();
+                                if (itemInfo.has("implicitMods")) {
+                                    //The implicitMods
+                                    socketedImplicitMods = itemInfo.getJSONArray("implicitMods");
+                                }
+
+                                /*
+                                 * EXPLICIT MODS: Add each mod if any at all to the layout.
+                                 * */
+                                JSONArray socketedExplicitMods = new JSONArray();
+                                if (itemInfo.has("explicitMods")) {
+                                    socketedExplicitMods = itemInfo.getJSONArray("explicitMods");
+                                }
+                                
+                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedExplicitMods, socketedImplicitMods, socketedItemInventoryId);
+                                itemArray.add(socketedIndividualItem);
+                            }
+                            Log.i("socketItem", socketedItemInfo.toString());
+                        }
+
+                    }
+                }
+
                 // Add the item to our itemArray so we can later sort the order of them by values
                 Item individualItem = new Item(itemIcon, itemName, itemType, explicitMods, implicitMods, inventoryId);
                 itemArray.add(individualItem);
 
-                // SOCKETED ITEMS PARSING
-                //JSONArray socketedItems = itemInfo.getJSONArray("socketedItems");
-                // The individual gem
-                //JSONObject socketedGem = socketedItems.getJSONObject(0);
-                //String gemName = socketedGem.getString("typeLine");
 
-                // set the textView
-                //TextView itemSocket = findViewById(R.id.itemSocket);
-                //itemSocket.setText(gemName);
-
-                // set the image
-                //ImageView itemSocketIv = findViewById(R.id.socketImage);
-                // image icon url
-                //String socketIcon = socketedGem.getString("icon");
-                // the json has backslashes that break url, this removes them.
-                //socketIcon = socketIcon.replace("\\", "");
-                //Log.i("charInfo", socketIcon);
-                // Loads image into imageview by url
-                //Picasso.with(getApplicationContext()).load(socketIcon).into(itemSocketIv);
-
-                //Log.i("charInfo", socketedGem.toString());
-
-                //Log.i("charInfo", "Item Name: " + itemName);
             }
         } catch (JSONException e) {
             Log.d("charInfo", "Error: " + e);
@@ -431,6 +467,14 @@ public class CharacterInfo extends AppCompatActivity {
             Item item = itemArray.get(i);
 
             if (item.getInventoryId().equals("Flask")) {
+                sortedList.add(item);
+            }
+        }
+
+        for (int i = 0; i < itemArray.size(); i++) {
+            Item item = itemArray.get(i);
+
+            if (item.getInventoryId().equals("abyssJewel")) {
                 sortedList.add(item);
             }
         }
