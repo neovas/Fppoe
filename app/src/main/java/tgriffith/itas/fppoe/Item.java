@@ -17,16 +17,27 @@ public class Item {
     public JSONArray implicitMods;
     public JSONArray explicitMods;
     public String inventoryId;
+    public JSONArray enchantMods;
+    public JSONArray craftedMods;
 
-    public Item(String imageUrl, String name, String typeLine, JSONArray implicitMods, JSONArray explicitMods, String inventoryId) {
+    public Item(String imageUrl, String name, String typeLine, JSONArray implicitMods, JSONArray explicitMods, String inventoryId, JSONArray enchantMods, JSONArray craftedMods) {
         this.imageUrl = imageUrl;
         this.name = name;
         this.typeLine = typeLine;
         this.implicitMods = implicitMods;
         this.explicitMods = explicitMods;
         this.inventoryId = inventoryId;
+        this.enchantMods = enchantMods;
+        this.craftedMods = craftedMods;
     }
 
+    public JSONArray getCraftedMods() {
+        return craftedMods;
+    }
+
+    public JSONArray getEnchantMods() {
+        return enchantMods;
+    }
 
     public String getImageUrl() {
         return imageUrl;

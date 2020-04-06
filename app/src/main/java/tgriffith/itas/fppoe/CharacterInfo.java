@@ -25,6 +25,7 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,8 +151,6 @@ public class CharacterInfo extends AppCompatActivity {
 
             //The textviews for storing item info
             TextView iName = new TextView(getApplicationContext());
-            TextView iIMods = new TextView(getApplicationContext());
-            TextView iEMods = new TextView(getApplicationContext());
 
             Item item = sortedList.get(i);
 
@@ -166,6 +165,7 @@ public class CharacterInfo extends AppCompatActivity {
             // Add the name to the layout
             childLl.addView(iName);
 
+
             // Set dimensions of our image in dp
             int widthHeightDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
             itemIconIv.getLayoutParams().height = widthHeightDp;
@@ -174,37 +174,47 @@ public class CharacterInfo extends AppCompatActivity {
             Picasso.with(getApplicationContext()).load(itemIcon).into(itemIconIv);
 
             /*
+             * Add Enchant Mods
+             * */
+            JSONArray enchantMods = new JSONArray();
+            if (item.getEnchantMods().length() > 0) {
+                //The implicitMods
+                enchantMods = item.getEnchantMods();
+                //Log.i("charInfo", implicitMods.toString());
+
+                //Loop through the implicitMods
+                for (int j = 0; j < enchantMods.length(); j++) {
+                    TextView iTest = new TextView(getApplicationContext());
+                    try {
+                        iTest.setText(enchantMods.get(j).toString());
+                    } catch (JSONException e) {
+                        Log.d("json", "Error: " + e);
+                    }
+                    childLl.addView(iTest);
+                }
+            }
+
+            /*
              * IMPLICIT MODS: Add each mod if any to the layout
              * */
             JSONArray implicitMods = new JSONArray();
             if (item.getImplicitMods().length() > 0) {
                 //The implicitMods
                 implicitMods = item.getImplicitMods();
-                //Log.i("charInfo", implicitMods.toString());
+                Log.i("implicitMods", "Implicit: " + implicitMods.toString());
 
 
                 //Loop through the implicitMods
                 for (int j = 0; j < implicitMods.length(); j++) {
-                    // Set the text on first loop. Following loops append to it.
-                    if (j == 0) {
-                        try {
-                            iIMods.setText(implicitMods.get(j).toString());
-                        } catch (JSONException e) {
-                            Log.e("JSON", "Error: " + e);
-                        }
 
-                    } else {
-
-                        try {
-                            iIMods.append('\n' + implicitMods.get(j).toString());
-                        } catch (JSONException e) {
-                            Log.e("JSON", "Error: " + e);
-                        }
-
+                    TextView iTest = new TextView(getApplicationContext());
+                    try {
+                        iTest.setText(implicitMods.get(j).toString());
+                    } catch (JSONException e) {
+                        Log.d("json", "Error: " + e);
                     }
+                    childLl.addView(iTest);
                 }
-                // add the implicit mods to the layout
-                childLl.addView(iIMods);
             }
 
             /*
@@ -213,30 +223,42 @@ public class CharacterInfo extends AppCompatActivity {
             JSONArray explicitMods = new JSONArray();
             if (item.getExplicitMods().length() > 0) {
                 explicitMods = item.getExplicitMods();
-                Log.i("charInfo", explicitMods.toString());
-
+                Log.i("implicitMods", "Explicit: " + explicitMods.toString());
 
                 //Loop through the explicitMods
                 for (int j = 0; j < explicitMods.length(); j++) {
-                    // Set the text on first loop. Following loops append to it.
-                    if (i == 0) {
-                        try {
-                            iEMods.setText(explicitMods.get(j).toString() + '\n');
-                        } catch (JSONException e) {
-                            Log.e("JSON", "Error: " + e);
-                        }
 
-                    } else {
-                        try {
-                            iEMods.append(explicitMods.get(j).toString() + '\n');
-                        } catch (JSONException e) {
-                            Log.e("JSON", "Error: " + e);
-                        }
+                    TextView iTest = new TextView(getApplicationContext());
+                    try {
+                        iTest.setText(explicitMods.get(j).toString());
+                    } catch (JSONException e) {
+                        Log.d("json", "Error: " + e);
                     }
+                    childLl.addView(iTest);
 
                 }
-                // add the explicit mods to the layout
-                childLl.addView(iEMods);
+            }
+
+            /*
+             * Add crafted Mods
+             * */
+            JSONArray craftMods = new JSONArray();
+            if (item.getCraftedMods().length() > 0) {
+                //The implicitMods
+                craftMods = item.getCraftedMods();
+                //Log.i("charInfo", implicitMods.toString());
+
+
+                //Loop through the implicitMods
+                for (int j = 0; j < craftMods.length(); j++) {
+                    TextView iTest = new TextView(getApplicationContext());
+                    try {
+                        iTest.setText(craftMods.get(j).toString());
+                    } catch (JSONException e) {
+                        Log.d("json", "Error: " + e);
+                    }
+                    childLl.addView(iTest);
+                }
             }
         }
     }
@@ -300,6 +322,24 @@ public class CharacterInfo extends AppCompatActivity {
                 }
 
                 /**
+                 *  ENCHANTMENTS: Check all for enchants
+                 * */
+                JSONArray enchantMods = new JSONArray();
+                if (itemInfo.has("enchantMods")) {
+                    enchantMods = itemInfo.getJSONArray("enchantMods");
+                    Log.i("charInfo", enchantMods.toString());
+                }
+
+                /**
+                 *  Crafted Mods: Check all for crafted mods
+                 * */
+                JSONArray craftMods = new JSONArray();
+                if (itemInfo.has("craftedMods")) {
+                    craftMods = itemInfo.getJSONArray("craftedMods");
+                    Log.i("charInfo", craftMods.toString());
+                }
+
+                /**
                  * Find socketed jewels and/or gems
                  * */
                 JSONArray socketedItems = new JSONArray();
@@ -347,8 +387,26 @@ public class CharacterInfo extends AppCompatActivity {
                                 if (itemInfo.has("explicitMods")) {
                                     socketedExplicitMods = itemInfo.getJSONArray("explicitMods");
                                 }
-                                
-                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedExplicitMods, socketedImplicitMods, socketedItemInventoryId);
+
+                                /**
+                                 *  ENCHANTMENTS: Check all for enchants
+                                 * */
+                                JSONArray socketedEnchantMods = new JSONArray();
+                                if (itemInfo.has("enchantMods")) {
+                                    socketedEnchantMods = itemInfo.getJSONArray("enchantMods");
+                                    Log.i("charInfo", enchantMods.toString());
+                                }
+
+                                /**
+                                 *  Crafted Mods: Check all for crafted mods
+                                 * */
+                                JSONArray socketedCraftMods = new JSONArray();
+                                if (itemInfo.has("craftedMods")) {
+                                    socketedCraftMods = itemInfo.getJSONArray("craftedMods");
+                                    Log.i("charInfo", craftMods.toString());
+                                }
+
+                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods);
                                 itemArray.add(socketedIndividualItem);
                             }
                             Log.i("socketItem", socketedItemInfo.toString());
@@ -358,7 +416,7 @@ public class CharacterInfo extends AppCompatActivity {
                 }
 
                 // Add the item to our itemArray so we can later sort the order of them by values
-                Item individualItem = new Item(itemIcon, itemName, itemType, explicitMods, implicitMods, inventoryId);
+                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods);
                 itemArray.add(individualItem);
 
 
@@ -368,6 +426,47 @@ public class CharacterInfo extends AppCompatActivity {
 
         }
 
+    }
+
+    // Requests the passive tree information for the purpose of
+    public void requestPassives() {
+
+        charInfoUrl = "https://www.pathofexile.com/character-window/get-passive-skills?character=" + charName + "&accountName=" + acctName;
+        Log.i("charInfo", charInfoUrl);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, charInfoUrl, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        //parsePassiveInfo(response);
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("charInfo", "Error Code: " + error.networkResponse.statusCode);
+                        Log.i("charInfo", "error :" + error.toString());
+                        /**
+                         * Check for error 503 network response. This is the error thrown when
+                         * game/website is down. Toast the user telling them servers cannot be reached.
+                         * */
+                        if (error.networkResponse.statusCode == 503) {
+                            Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_LONG).show();
+                        }
+                        /**
+                         * 403 response generally is due to the account being marked as private.
+                         * Close the activity
+                         * */
+                        if (error.networkResponse.statusCode == 403) {
+                            Toast.makeText(getApplicationContext(), "Cannot access account. Marked as private.", Toast.LENGTH_LONG).show();
+                            finish();
+                        }
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
     }
 
     /*
