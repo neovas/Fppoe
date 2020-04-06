@@ -74,7 +74,7 @@ public class CharacterInfo extends AppCompatActivity {
 
         llWrapper = findViewById(R.id.llItemsContainer);
 
-        charAccTv.setText(charName + " - " + acctName);
+        charAccTv.setText(charName);
         classLevelTv.setText(charLevel + " - " + charClass);
 
 
@@ -384,25 +384,25 @@ public class CharacterInfo extends AppCompatActivity {
                                  * IMPLICIT MODS: Add each mod if any to the layout
                                  * */
                                 JSONArray socketedImplicitMods = new JSONArray();
-                                if (itemInfo.has("implicitMods")) {
+                                if (socketedItemInfo.has("implicitMods")) {
                                     //The implicitMods
-                                    socketedImplicitMods = itemInfo.getJSONArray("implicitMods");
+                                    socketedImplicitMods = socketedItemInfo.getJSONArray("implicitMods");
                                 }
 
                                 /*
                                  * EXPLICIT MODS: Add each mod if any at all to the layout.
                                  * */
                                 JSONArray socketedExplicitMods = new JSONArray();
-                                if (itemInfo.has("explicitMods")) {
-                                    socketedExplicitMods = itemInfo.getJSONArray("explicitMods");
+                                if (socketedItemInfo.has("explicitMods")) {
+                                    socketedExplicitMods = socketedItemInfo.getJSONArray("explicitMods");
                                 }
 
                                 /**
                                  *  ENCHANTMENTS: Check all for enchants
                                  * */
                                 JSONArray socketedEnchantMods = new JSONArray();
-                                if (itemInfo.has("enchantMods")) {
-                                    socketedEnchantMods = itemInfo.getJSONArray("enchantMods");
+                                if (socketedItemInfo.has("enchantMods")) {
+                                    socketedEnchantMods = socketedItemInfo.getJSONArray("enchantMods");
                                     Log.i("charInfo", enchantMods.toString());
                                 }
 
@@ -410,8 +410,8 @@ public class CharacterInfo extends AppCompatActivity {
                                  *  Crafted Mods: Check all for crafted mods
                                  * */
                                 JSONArray socketedCraftMods = new JSONArray();
-                                if (itemInfo.has("craftedMods")) {
-                                    socketedCraftMods = itemInfo.getJSONArray("craftedMods");
+                                if (socketedItemInfo.has("craftedMods")) {
+                                    socketedCraftMods = socketedItemInfo.getJSONArray("craftedMods");
                                     Log.i("charInfo", craftMods.toString());
                                 }
 
