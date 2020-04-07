@@ -4,10 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Layout;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,10 +30,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 import static java.lang.System.exit;
 
@@ -126,9 +132,104 @@ public class CharacterInfo extends AppCompatActivity {
         queue.add(jsonObjectRequest);
     }
 
+    /**
+     * Display all gems to our user.
+     * Breaks them down by item and then further by link
+     * Shows the name, level, quality.
+     */
+    public void populateGems() {
+        // Loop through all items
+        for (int i = 0; i < sortedList.size(); i++) {
+            Item item = sortedList.get(i);
+
+            // Confirm it has gems
+            if (item.getGems().size() > 0) {
+
+                // Store item type. e.g. "Body Armour"
+                TextView itemType = new TextView(getApplicationContext());
+
+                // The LL which holds the gem information. Add to our wrapper
+                LinearLayout childLl = new LinearLayout(getApplicationContext());
+                childLl.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                childLl.setOrientation(LinearLayout.VERTICAL);
+                childLl.setPadding(25, 0, 25, 10);
+                llWrapper.addView(childLl);
+
+
+                itemType.setText(item.getInventoryId());
+                itemType.setPadding(0, 5, 0, 5);
+                itemType.setTypeface(null, Typeface.BOLD);
+
+                childLl.addView(itemType);
+
+                int nextGroup = 0;
+                int curGroup = 0;
+
+                // loop through all gems in the item
+                for (int j = 0; j < item.getGems().size(); j++) {
+
+                    // create line for first gem
+                    if (j == 0) {
+                        // create a line seperating our socket groups
+                        View line = new View(getApplicationContext());
+                        line.setBackgroundColor(Color.BLACK);
+                        line.setPadding(0, 15, 0, 15);
+                        childLl.addView(line, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 2));
+                    }
+
+                    // the individual gem
+                    Gem gem = item.getGems().get(j);
+
+                    //current gem's group
+                    curGroup = gem.getGroupNum();
+                    //next gem's group
+                    // make sure we aren't getting a null reference
+                    if (j + 1 < item.getGems().size()) {
+                        nextGroup = item.getGems().get(j + 1).getGroupNum();
+                    }
+
+
+                    //Display gem info
+                    TextView gemName = new TextView(getApplicationContext());
+                    gemName.setText(gem.getLevel() + "/" + gem.getQuality() + " " + gem.getTypeLine());
+
+
+                    childLl.addView(gemName);
+
+                    // if the next group is larger than our current this is a different link
+                    // draw a line between groups
+                    if (nextGroup > curGroup) {
+                        // create a line seperating our socket groups
+                        View line = new View(getApplicationContext());
+                        line.setBackgroundColor(Color.BLACK);
+                        line.setPadding(0, 15, 0, 15);
+                        childLl.addView(line, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 2));
+                    }
+
+                    // add line for last gem listed.
+                    if (j + 1 == item.getGems().size()) {
+                        // create a line seperating our socket groups
+                        View line = new View(getApplicationContext());
+                        line.setBackgroundColor(Color.BLACK);
+                        line.setPadding(0, 15, 0, 15);
+                        childLl.addView(line, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 2));
+                    }
+                }
+
+            }
+        }
+    }
+
+    /**
+     * Displays all Equipped Gear for a character.
+     */
     public void populateCharacterInfo() {
+        populateGems();
 
         for (int i = 0; i < sortedList.size(); i++) {
+            // Our individual item
+            Item item = sortedList.get(i);
+
             /**
              * Create the layouts and views for an item entry
              * */
@@ -155,7 +256,6 @@ public class CharacterInfo extends AppCompatActivity {
             //The textviews for storing item info
             TextView iName = new TextView(getApplicationContext());
 
-            Item item = sortedList.get(i);
 
             // image icon url
             String itemIcon = item.imageUrl;
@@ -310,6 +410,9 @@ public class CharacterInfo extends AppCompatActivity {
                 // the json has backslashes that break url, this removes them.
                 itemIcon = itemIcon.replace("\\", "");
 
+                // Store the list of gems for the item
+                ArrayList<Gem> gems = new ArrayList<>();
+
                 /*
                  * IMPLICIT MODS: Add each mod if any to the layout
                  * */
@@ -415,17 +518,78 @@ public class CharacterInfo extends AppCompatActivity {
                                     Log.i("charInfo", craftMods.toString());
                                 }
 
-                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods);
+                                // add to the socketed item array
+                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems);
                                 itemArray.add(socketedIndividualItem);
+
+                                // Determine is the socketed item is a gem
+                            } else if (socketedItemInfo.has("support")) {
+                                socketedItemIcon = socketedItemInfo.getString("icon");
+                                socketedItemType = socketedItemInfo.getString("typeLine");
+                                String gemLevel = "";
+                                String gemQuality = "0";
+                                // Which socket the gem is socketed in
+                                String socketNumber = socketedItemInfo.getString("socket");
+                                String socketGroupNumber = "";
+
+                                // Peeling the properties field layers of JSON
+                                JSONArray gemProperties = socketedItemInfo.getJSONArray("properties");
+
+                                /**
+                                 * Loop through the spaghetti JSON to find the name and quality values.
+                                 * Then proceed to due way too much stuff with the strings to get our
+                                 * values for our gem.
+                                 * */
+                                for (int z = 0; z < gemProperties.length(); z++) {
+                                    JSONObject gemLQProperties = gemProperties.getJSONObject(z);
+                                    //Store the name field's value. We need to find the one with level and one with quality
+                                    String nameFieldVal = gemLQProperties.getString("name");
+
+                                    // check for the existence of the name field to prevent crashes
+                                    // then check that its for the Level
+                                    if (gemLQProperties.has("name") && nameFieldVal.equals("Level")) {
+                                        gemLevel = extractLevelOrQuality(gemLQProperties);
+                                        //Log.i("jsonTest", "Gem Level: " + gemLevel);
+                                        /**
+                                         * Looking for the quality field. Then doing the breakdown we did
+                                         * for the name
+                                         * */
+                                    } else if (gemLQProperties.has("name") && nameFieldVal.equals("Quality")) {
+                                        gemQuality = extractLevelOrQuality(gemLQProperties);
+                                        //Log.i("jsonTest", "Gem Quality: " + gemQuality);
+                                    }
+                                }
+
+                                //Gem links and sockets
+                                JSONArray sockets = itemInfo.getJSONArray("sockets");
+                                // The current gem's socket number
+                                int gemSocketNum = Integer.parseInt(socketedItemInfo.getString("socket"));
+
+                                // Using the current gem's socket number find the group of the item socket
+                                JSONObject socketGroup = sockets.getJSONObject(gemSocketNum);
+                                socketGroupNumber = socketGroup.getString("group");
+
+                                // Convert group number to integer so we can utilize it in our gem class.
+                                int groupNumber = Integer.parseInt(socketGroupNumber);
+                                //Log.i("jsonTest", "Item: " + itemType + "Gem: " + socketedItemType + " Group: " + socketGroupNumber);
+
+                                // Create our gem and add to the gem array.
+                                Gem individualGem = new Gem(socketedItemType, socketedItemIcon, gemQuality, gemLevel, groupNumber);
+                                gems.add(individualGem);
+
+                                for (int z = 0; z < gems.size(); z++) {
+                                    Log.i("gemsArray", "Gem: " + gems.get(z).typeLine + " " + gems.get(z).getGroupNum());
+                                }
+
                             }
-                            Log.i("socketItem", socketedItemInfo.toString());
+                            //Log.i("socketItem", socketedItemInfo.toString());
                         }
 
                     }
                 }
 
                 // Add the item to our itemArray so we can later sort the order of them by values
-                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods);
+                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems);
                 Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
                 itemArray.add(individualItem);
 
@@ -437,6 +601,31 @@ public class CharacterInfo extends AppCompatActivity {
 
         }
         requestPassives();
+    }
+
+    /**
+     * Peel the onion layers of JSON for the level and quality fields. Returns the level or quality.
+     */
+    public String extractLevelOrQuality(JSONObject gemLQProperties) {
+        try {
+            //Grabbing the stored level and quality of the gemss
+            JSONArray gemLQ = gemLQProperties.getJSONArray("values");
+            // Grab the array inside.
+            String gemLevelArrayString = gemLQ.get(0).toString();
+            // Info stuck inside another array we can't access so remove brackets
+            String newString = gemLevelArrayString.substring(1, gemLevelArrayString.length() - 1);
+            // Break the field into two fields split at the comma. First
+            // entry into our List will be the level
+            List<String> brokenDownString = Arrays.asList(newString.split(","));
+            // remove all non digit characters
+            String result = brokenDownString.get(0).replaceAll("\\D+", "");
+            return result;
+        } catch (JSONException e) {
+            Log.i("json", "Error, ExtractLevelOrQuality: " + e);
+        }
+
+        return null;
+
     }
 
     /*
@@ -482,6 +671,8 @@ public class CharacterInfo extends AppCompatActivity {
                 itemIcon = itemInfo.getString("icon");
                 // the json has backslashes that break url, this removes them.
                 itemIcon = itemIcon.replace("\\", "");
+
+                ArrayList<Gem> gems = new ArrayList<>();
 
                 /*
                  * IMPLICIT MODS: Add each mod if any to the layout
@@ -588,7 +779,7 @@ public class CharacterInfo extends AppCompatActivity {
                                     Log.i("charInfo", craftMods.toString());
                                 }
 
-                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods);
+                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems);
                                 itemArray.add(socketedIndividualItem);
                             }
                             Log.i("socketItem", socketedItemInfo.toString());
@@ -598,7 +789,7 @@ public class CharacterInfo extends AppCompatActivity {
                 }
 
                 // Add the item to our itemArray so we can later sort the order of them by values
-                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods);
+                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems);
                 Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
                 itemArray.add(individualItem);
 
