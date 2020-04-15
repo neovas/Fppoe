@@ -10,6 +10,8 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 
 /**
@@ -65,10 +67,10 @@ public class CustomListAdapter extends ArrayAdapter {
         // Color code dead characters. Death status done second so you can see dead characters
         // of online players.
         if (onlineArray.get(position).equals("true")) {
-            rankTextField.setBackgroundColor((Color.GREEN));
+            rankTextField.setBackgroundColor((ContextCompat.getColor(context, R.color.onlineGreen)));
         }
         if (deathArray.get(position).equals("true")) {
-            rankTextField.setBackgroundColor(Color.RED);
+            rankTextField.setBackgroundColor(ContextCompat.getColor(context, R.color.deadRed));
         }
 
         return rowView;

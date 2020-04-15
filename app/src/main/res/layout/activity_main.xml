@@ -12,7 +12,9 @@
         android:layout_height="75dp"
         android:prompt="@string/spinner_title"
         android:spinnerMode="dropdown"
-        android:textColor="#FF0000"
+        android:popupBackground="@color/spinnerbg"
+        android:popupTheme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
+        android:textAppearance="@color/dkPText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

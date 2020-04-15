@@ -2,10 +2,12 @@ package tgriffith.itas.fppoe;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -105,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Remove title bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -141,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 accountNameArray.clear();
                 characterClassArray.clear();
                 characterLevelArray.clear();
+                clAdapter.notifyDataSetChanged();
 
                 // Check whether we are refreshing a standard league result or an account search
                 if (isAccountSearch == false) {
@@ -166,15 +172,16 @@ public class MainActivity extends AppCompatActivity {
                 "Standard", "Hardcore", "SSF Standard", "SSF Hardcore"
         };
         // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, leagueChoices);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.ladder_spinner_entry, leagueChoices);
         // attaching data adapter to spinner
         spinner.setAdapter(dataAdapter);
         // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        dataAdapter.setDropDownViewResource(R.layout.ladder_spinner_entry);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+                //((TextView) parent.getChildAt(0)).setTypeface(null, Typeface.BOLD);
+                //((TextView) parent.getChildAt(0)).setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.dkPText));
                 /**
                  * Clear the listView and then reset the arrays so
                  * on league change only those entries are stored.
@@ -188,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 accountNameArray.clear();
                 characterClassArray.clear();
                 characterLevelArray.clear();
+                clAdapter.notifyDataSetChanged();
 
                 //grab the selected item from the spinner
                 String league = parent.getItemAtPosition(position).toString();
@@ -229,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                 accountNameArray.clear();
                 characterClassArray.clear();
                 characterLevelArray.clear();
+                clAdapter.notifyDataSetChanged();
 
                 // store account name in our global variable for use in tablePopulate
                 searchedAccountName = query;
@@ -264,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
                     accountNameArray.clear();
                     characterClassArray.clear();
                     characterLevelArray.clear();
+                    clAdapter.notifyDataSetChanged();
 
                     // not searching for an account name so reset account search flag to false
                     isAccountSearch = false;
@@ -324,7 +334,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.i("ladder", "Request" + response);
+                        clAdapter.clear();
+                        nameArray.clear();
+                        infoArray.clear();
+                        rankArray.clear();
+                        deathStatusArray.clear();
+                        onlineStatusArray.clear();
+                        accountNameArray.clear();
+                        characterClassArray.clear();
+                        characterLevelArray.clear();
                         tablePopulate(response);
+                        clAdapter.notifyDataSetChanged();
                     }
                 }, new Response.ErrorListener() {
 
@@ -338,16 +358,11 @@ public class MainActivity extends AppCompatActivity {
                         NetworkResponse networkResponse = error.networkResponse;
                         if (networkResponse != null && networkResponse.statusCode == 503) {
                             Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_LONG).show();
+                        } else if (networkResponse != null && networkResponse.statusCode == 429) {
+                            Toast.makeText(getApplicationContext(), "Too many searches in a short time. Please try again in minute.", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
-        // retry after 10 seconds if no luck in getting a response.
-        jsonObjectRequest.setRetryPolicy(new DefaultRetryPolicy(
-                10000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-        ));
-
                 queue.add(jsonObjectRequest);
     }
 
@@ -419,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.i("ladder", accNameVal + " " + nameVal + " " + rankVal);
 
-                clAdapter.notifyDataSetChanged();
+                //clAdapter.notifyDataSetChanged();
 
             }
             //Log.i("ladder", "Rank is: " + rank);

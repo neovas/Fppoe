@@ -7,53 +7,40 @@
     tools:context=".CharacterInfo">
 
     <TextView
-        android:id="@+id/classLevelTv"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:text="Level 100 - Ascendant"
-        android:textSize="20dp"
-        app:autoSizeMaxTextSize="50dp"
-        app:autoSizeMinTextSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/charAccTv" />
-
-    <TextView
         android:id="@+id/charAccTv"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="Character Name - Account Name"
-        android:textSize="20dp"
+        android:textSize="18dp"
         app:autoSizeMaxTextSize="50dp"
         app:autoSizeMinTextSize="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/classLevelTv"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.078"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/classLevelTv"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Level 100 - Ascendant"
+        android:textSize="15dp"
+        app:autoSizeMaxTextSize="50dp"
+        app:autoSizeMinTextSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/charAccTv" />
+
+    <ListView
+        android:id="@+id/eqListview"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/classLevelTv"
-        app:layout_constraintVertical_bias="0.503">
-
-        <LinearLayout
-            android:id="@+id/llItemsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/classLevelTv" />
-
-    </ScrollView>
+        app:layout_constraintTop_toBottomOf="@+id/classLevelTv" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

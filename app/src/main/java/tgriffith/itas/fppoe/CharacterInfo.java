@@ -12,8 +12,10 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,17 +54,24 @@ public class CharacterInfo extends AppCompatActivity {
 
     // Storing each item in this array.
     ArrayList<Item> itemArray = new ArrayList<Item>();
-    ArrayList<Item> sortedList;
+    ArrayList<Item> sortedList = new ArrayList<>();
 
     private RequestQueue queue;
     // returns all item info for a specific character
     private String charInfoUrl;
 
     LinearLayout llWrapper;
+    ListView lvWrapper;
+
+    // list adapter for equipment
+    EquipCustomListAdapter eqclAdapter;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Remove title bar
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_character_info);
         Intent flagIntent = getIntent();
@@ -78,15 +87,23 @@ public class CharacterInfo extends AppCompatActivity {
         TextView charAccTv = findViewById(R.id.charAccTv);
         TextView classLevelTv = findViewById(R.id.classLevelTv);
 
-        llWrapper = findViewById(R.id.llItemsContainer);
+        //llWrapper = findViewById(R.id.llItemsContainer);
+        lvWrapper = findViewById(R.id.eqListview);
 
         charAccTv.setText(charName);
         classLevelTv.setText(charLevel + " - " + charClass);
 
 
         Log.i("charInfo", "Character Name: " + charName + " | Account Name: " + acctName + " |Level: " + charLevel + " |Class: " + charClass);
+        // provide our custom adapter the sorted item information
 
+        eqclAdapter = new EquipCustomListAdapter(this, sortedList);
+        lvWrapper.setAdapter(eqclAdapter);
         request();
+
+        eqclAdapter.notifyDataSetChanged();
+
+
 
     }
 
@@ -220,152 +237,6 @@ public class CharacterInfo extends AppCompatActivity {
         }
     }
 
-    /**
-     * Displays all Equipped Gear for a character.
-     */
-    public void populateCharacterInfo() {
-        populateGems();
-
-        for (int i = 0; i < sortedList.size(); i++) {
-            // Our individual item
-            Item item = sortedList.get(i);
-
-            /**
-             * Create the layouts and views for an item entry
-             * */
-            // The LL which contains the icon and item info
-            LinearLayout parent = new LinearLayout(getApplicationContext());
-            parent.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            parent.setOrientation(LinearLayout.HORIZONTAL);
-            parent.setPadding(0, 0, 0, 10);
-
-            // Add our parent ll to our grandpappy ll.
-            llWrapper.addView(parent);
-
-            // Stores the image icon
-            ImageView itemIconIv = new ImageView(getApplicationContext());
-            // The LL which holds the item information
-            LinearLayout childLl = new LinearLayout(getApplicationContext());
-            childLl.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            childLl.setOrientation(LinearLayout.VERTICAL);
-
-            // Add the child elements to our parent LL
-            parent.addView(itemIconIv);
-            parent.addView(childLl);
-
-            //The textviews for storing item info
-            TextView iName = new TextView(getApplicationContext());
-
-
-            // image icon url
-            String itemIcon = item.imageUrl;
-            // the json has backslashes that break url, this removes them.
-            itemIcon = itemIcon.replace("\\", "");
-            //Log.i("charInfo", itemIcon);
-
-            // Display the item name and item type
-            iName.setText(item.name + " " + item.getTypeLine());
-            // Add the name to the layout
-            childLl.addView(iName);
-
-
-            // Set dimensions of our image in dp
-            int widthHeightDp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics());
-            itemIconIv.getLayoutParams().height = widthHeightDp;
-            itemIconIv.getLayoutParams().width = widthHeightDp;
-            // Loads image into imageview by url
-            Picasso.with(getApplicationContext()).load(itemIcon).into(itemIconIv);
-
-            /*
-             * Add Enchant Mods
-             * */
-            JSONArray enchantMods = new JSONArray();
-            if (item.getEnchantMods().length() > 0) {
-                //The implicitMods
-                enchantMods = item.getEnchantMods();
-                //Log.i("charInfo", implicitMods.toString());
-
-                //Loop through the implicitMods
-                for (int j = 0; j < enchantMods.length(); j++) {
-                    TextView iTest = new TextView(getApplicationContext());
-                    try {
-                        iTest.setText(enchantMods.get(j).toString());
-                    } catch (JSONException e) {
-                        Log.d("json", "Error: " + e);
-                    }
-                    childLl.addView(iTest);
-                }
-            }
-
-            /*
-             * IMPLICIT MODS: Add each mod if any to the layout
-             * */
-            JSONArray implicitMods = new JSONArray();
-            if (item.getImplicitMods().length() > 0) {
-                //The implicitMods
-                implicitMods = item.getImplicitMods();
-                Log.i("implicitMods", "Implicit: " + implicitMods.toString());
-
-
-                //Loop through the implicitMods
-                for (int j = 0; j < implicitMods.length(); j++) {
-
-                    TextView iTest = new TextView(getApplicationContext());
-                    try {
-                        iTest.setText(implicitMods.get(j).toString());
-                    } catch (JSONException e) {
-                        Log.d("json", "Error: " + e);
-                    }
-                    childLl.addView(iTest);
-                }
-            }
-
-            /*
-             * EXPLICIT MODS: Add each mod if any at all to the layout.
-             * */
-            JSONArray explicitMods = new JSONArray();
-            if (item.getExplicitMods().length() > 0) {
-                explicitMods = item.getExplicitMods();
-                Log.i("implicitMods", "Explicit: " + explicitMods.toString());
-
-                //Loop through the explicitMods
-                for (int j = 0; j < explicitMods.length(); j++) {
-
-                    TextView iTest = new TextView(getApplicationContext());
-                    try {
-                        iTest.setText(explicitMods.get(j).toString());
-                    } catch (JSONException e) {
-                        Log.d("json", "Error: " + e);
-                    }
-                    childLl.addView(iTest);
-
-                }
-            }
-
-            /*
-             * Add crafted Mods
-             * */
-            JSONArray craftMods = new JSONArray();
-            if (item.getCraftedMods().length() > 0) {
-                //The implicitMods
-                craftMods = item.getCraftedMods();
-                //Log.i("charInfo", implicitMods.toString());
-
-
-                //Loop through the implicitMods
-                for (int j = 0; j < craftMods.length(); j++) {
-                    TextView iTest = new TextView(getApplicationContext());
-                    try {
-                        iTest.setText(craftMods.get(j).toString());
-                    } catch (JSONException e) {
-                        Log.d("json", "Error: " + e);
-                    }
-                    childLl.addView(iTest);
-                }
-            }
-        }
-    }
-
     /*
      * Breaks down the characterInfo JSON into Item objects which are then put into an arraylist.
      * */
@@ -395,7 +266,7 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONObject itemInfo = entriesArray.getJSONObject(itemCounter);
 
                 itemName = itemInfo.getString("name");
-                Log.i("charInfo", "Item Name: " + itemName);
+                //Log.i("charInfo", "Item Name: " + itemName);
                 itemType = itemInfo.getString("typeLine");
                 if (itemInfo.has("abyssJewel")) {
                     inventoryId = "abyssJewel";
@@ -429,7 +300,7 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONArray explicitMods = new JSONArray();
                 if (itemInfo.has("explicitMods")) {
                     explicitMods = itemInfo.getJSONArray("explicitMods");
-                    Log.i("charInfo", explicitMods.toString());
+                    //Log.i("charInfo", explicitMods.toString());
 
                 }
 
@@ -439,7 +310,7 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONArray enchantMods = new JSONArray();
                 if (itemInfo.has("enchantMods")) {
                     enchantMods = itemInfo.getJSONArray("enchantMods");
-                    Log.i("charInfo", enchantMods.toString());
+                    //Log.i("charInfo", enchantMods.toString());
                 }
 
                 /**
@@ -448,7 +319,24 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONArray craftMods = new JSONArray();
                 if (itemInfo.has("craftedMods")) {
                     craftMods = itemInfo.getJSONArray("craftedMods");
-                    Log.i("charInfo", craftMods.toString());
+                    //Log.i("charInfo", craftMods.toString());
+                }
+
+                // the different rarities
+                // frametype 0 = common, 1 = magic, 2 = rare, 3 = unique
+                String itemRarity = "Common";
+                if (itemInfo.has("frameType")) {
+                    int frameType = itemInfo.getInt("frameType");
+
+                    if (frameType == 0) {
+                        itemRarity = "Common";
+                    } else if (frameType == 1) {
+                        itemRarity = "Magic";
+                    } else if (frameType == 2) {
+                        itemRarity = "Rare";
+                    } else if (frameType == 3) {
+                        itemRarity = "Unique";
+                    }
                 }
 
                 /**
@@ -506,7 +394,7 @@ public class CharacterInfo extends AppCompatActivity {
                                 JSONArray socketedEnchantMods = new JSONArray();
                                 if (socketedItemInfo.has("enchantMods")) {
                                     socketedEnchantMods = socketedItemInfo.getJSONArray("enchantMods");
-                                    Log.i("charInfo", enchantMods.toString());
+                                    //Log.i("charInfo", enchantMods.toString());
                                 }
 
                                 /**
@@ -515,11 +403,28 @@ public class CharacterInfo extends AppCompatActivity {
                                 JSONArray socketedCraftMods = new JSONArray();
                                 if (socketedItemInfo.has("craftedMods")) {
                                     socketedCraftMods = socketedItemInfo.getJSONArray("craftedMods");
-                                    Log.i("charInfo", craftMods.toString());
+                                    //Log.i("charInfo", craftMods.toString());
+                                }
+
+                                // the different rarities
+                                // frametype 0 = common, 1 = magic, 2 = rare, 3 = unique
+                                String socketedItemRarity = "Common";
+                                if (socketedItemInfo.has("frameType")) {
+                                    int frameType = socketedItemInfo.getInt("frameType");
+
+                                    if (frameType == 0) {
+                                        socketedItemRarity = "Common";
+                                    } else if (frameType == 1) {
+                                        socketedItemRarity = "Magic";
+                                    } else if (frameType == 2) {
+                                        socketedItemRarity = "Rare";
+                                    } else if (frameType == 3) {
+                                        socketedItemRarity = "Unique";
+                                    }
                                 }
 
                                 // add to the socketed item array
-                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems);
+                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems, socketedItemRarity);
                                 itemArray.add(socketedIndividualItem);
 
                                 // Determine is the socketed item is a gem
@@ -578,7 +483,7 @@ public class CharacterInfo extends AppCompatActivity {
                                 gems.add(individualGem);
 
                                 for (int z = 0; z < gems.size(); z++) {
-                                    Log.i("gemsArray", "Gem: " + gems.get(z).typeLine + " " + gems.get(z).getGroupNum());
+                                    //Log.i("gemsArray", "Gem: " + gems.get(z).typeLine + " " + gems.get(z).getGroupNum());
                                 }
 
                             }
@@ -589,8 +494,8 @@ public class CharacterInfo extends AppCompatActivity {
                 }
 
                 // Add the item to our itemArray so we can later sort the order of them by values
-                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems);
-                Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
+                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems, itemRarity);
+                //Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
                 itemArray.add(individualItem);
 
 
@@ -657,11 +562,11 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONObject itemInfo = entriesArray.getJSONObject(itemCounter);
 
                 itemName = itemInfo.getString("name");
-                Log.i("charInfo", "Item Name: " + itemName);
+                // Log.i("charInfo", "Item Name: " + itemName);
                 itemType = itemInfo.getString("typeLine");
                 if (itemInfo.has("abyssJewel")) {
                     inventoryId = "abyssJewel";
-                    Log.i("jewelz", "AbyssJewel: " + itemName);
+                    // Log.i("jewelz", "AbyssJewel: " + itemName);
                 } else {
                     inventoryId = itemInfo.getString("inventoryId");
                 }
@@ -690,7 +595,7 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONArray explicitMods = new JSONArray();
                 if (itemInfo.has("explicitMods")) {
                     explicitMods = itemInfo.getJSONArray("explicitMods");
-                    Log.i("charInfo", explicitMods.toString());
+                    // Log.i("charInfo", explicitMods.toString());
 
                 }
 
@@ -700,7 +605,7 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONArray enchantMods = new JSONArray();
                 if (itemInfo.has("enchantMods")) {
                     enchantMods = itemInfo.getJSONArray("enchantMods");
-                    Log.i("charInfo", enchantMods.toString());
+                    //Log.i("charInfo", enchantMods.toString());
                 }
 
                 /**
@@ -709,7 +614,7 @@ public class CharacterInfo extends AppCompatActivity {
                 JSONArray craftMods = new JSONArray();
                 if (itemInfo.has("craftedMods")) {
                     craftMods = itemInfo.getJSONArray("craftedMods");
-                    Log.i("charInfo", craftMods.toString());
+                    //Log.i("charInfo", craftMods.toString());
                 }
 
                 /**
@@ -767,7 +672,7 @@ public class CharacterInfo extends AppCompatActivity {
                                 JSONArray socketedEnchantMods = new JSONArray();
                                 if (itemInfo.has("enchantMods")) {
                                     socketedEnchantMods = itemInfo.getJSONArray("enchantMods");
-                                    Log.i("charInfo", enchantMods.toString());
+                                    //Log.i("charInfo", enchantMods.toString());
                                 }
 
                                 /**
@@ -776,21 +681,55 @@ public class CharacterInfo extends AppCompatActivity {
                                 JSONArray socketedCraftMods = new JSONArray();
                                 if (itemInfo.has("craftedMods")) {
                                     socketedCraftMods = itemInfo.getJSONArray("craftedMods");
-                                    Log.i("charInfo", craftMods.toString());
+                                    // Log.i("charInfo", craftMods.toString());
                                 }
 
-                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems);
+                                // the different rarities
+                                // frametype 0 = common, 1 = magic, 2 = rare, 3 = unique
+                                String socketedItemRarity = "Common";
+                                if (socketedItemInfo.has("frameType")) {
+                                    int frameType = socketedItemInfo.getInt("frameType");
+
+                                    if (frameType == 0) {
+                                        socketedItemRarity = "Common";
+                                    } else if (frameType == 1) {
+                                        socketedItemRarity = "Magic";
+                                    } else if (frameType == 2) {
+                                        socketedItemRarity = "Rare";
+                                    } else if (frameType == 3) {
+                                        socketedItemRarity = "Unique";
+                                    }
+                                }
+
+                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems, socketedItemRarity);
                                 itemArray.add(socketedIndividualItem);
                             }
-                            Log.i("socketItem", socketedItemInfo.toString());
+                            //Log.i("socketItem", socketedItemInfo.toString());
                         }
 
                     }
                 }
 
+                // the different rarities
+                // frametype 0 = common, 1 = magic, 2 = rare, 3 = unique
+                String itemRarity = "Common";
+                if (itemInfo.has("frameType")) {
+                    int frameType = itemInfo.getInt("frameType");
+
+                    if (frameType == 0) {
+                        itemRarity = "Common";
+                    } else if (frameType == 1) {
+                        itemRarity = "Magic";
+                    } else if (frameType == 2) {
+                        itemRarity = "Rare";
+                    } else if (frameType == 3) {
+                        itemRarity = "Unique";
+                    }
+                }
+
                 // Add the item to our itemArray so we can later sort the order of them by values
-                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems);
-                Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
+                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems, itemRarity);
+                //Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
                 itemArray.add(individualItem);
 
 
@@ -853,7 +792,7 @@ public class CharacterInfo extends AppCompatActivity {
      * */
     public void itemArraySort() {
 
-        sortedList = new ArrayList<Item>();
+        //sortedList = new ArrayList<Item>();
 
         for (int i = 0; i < itemArray.size(); i++) {
             Item item = itemArray.get(i);
@@ -978,18 +917,23 @@ public class CharacterInfo extends AppCompatActivity {
 
             }
         }
+        // update the listview
+
+        eqclAdapter.notifyDataSetChanged();
+        //lvWrapper.setAdapter(eqclAdapter);
+        Log.i("adapter", Integer.toString(eqclAdapter.getCount()));
+        //Log.i("lv", sortedList.get(0).getName());
+        // Logging the list of sorted items
+        //for (int i = 0; i < sortedList.size(); i++) {
+        //   Log.i("sort", "Sorted: " + sortedList.get(i).getInventoryId() + " " + i);
+        //}
 
         // Logging the list of sorted items
-        for (int i = 0; i < sortedList.size(); i++) {
-            Log.i("sort", "Sorted: " + sortedList.get(i).getInventoryId() + " " + i);
-        }
+        //for (int i = 0; i < itemArray.size(); i++) {
+        //   Log.i("unsort", "Unsorted: " + itemArray.get(i).getInventoryId() + " " + i);
+        //}
 
-        // Logging the list of sorted items
-        for (int i = 0; i < itemArray.size(); i++) {
-            Log.i("unsort", "Unsorted: " + itemArray.get(i).getInventoryId() + " " + i);
-        }
-
-        populateCharacterInfo();
+        //TEMP populateCharacterInfo();
     }
 
 }

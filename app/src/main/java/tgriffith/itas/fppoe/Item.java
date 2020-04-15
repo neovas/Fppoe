@@ -20,8 +20,9 @@ public class Item {
     public JSONArray enchantMods;
     public JSONArray craftedMods;
     public ArrayList<Gem> gems;
+    public String rarity;
 
-    public Item(String imageUrl, String name, String typeLine, JSONArray implicitMods, JSONArray explicitMods, String inventoryId, JSONArray enchantMods, JSONArray craftedMods, ArrayList<Gem> gems) {
+    public Item(String imageUrl, String name, String typeLine, JSONArray implicitMods, JSONArray explicitMods, String inventoryId, JSONArray enchantMods, JSONArray craftedMods, ArrayList<Gem> gems, String rarity) {
         this.imageUrl = imageUrl;
         this.name = name;
         this.typeLine = typeLine;
@@ -31,6 +32,7 @@ public class Item {
         this.enchantMods = enchantMods;
         this.craftedMods = craftedMods;
         this.gems = gems;
+        this.rarity = rarity;
     }
 
     public ArrayList<Gem> getGems() {
@@ -39,6 +41,10 @@ public class Item {
 
     public void setGems(ArrayList<Gem> gems) {
         this.gems = gems;
+    }
+
+    public String getRarity() {
+        return rarity;
     }
 
     public JSONArray getCraftedMods() {
