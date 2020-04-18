@@ -13,4 +13,5 @@
     <color name="rarityMagic">#8787fe</color>
     <color name="rarityRare">#fefe76</color>
     <color name="rarityUnique">#af5e1c</color>
+    <color name="itemBaseStats">#7f7f7f</color>
 </resources>

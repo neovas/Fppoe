@@ -55,16 +55,21 @@ public class CharacterInfo extends AppCompatActivity {
     // Storing each item in this array.
     ArrayList<Item> itemArray = new ArrayList<Item>();
     ArrayList<Item> sortedList = new ArrayList<>();
+    ArrayList<Item> sortedListCopy = new ArrayList<>();
 
     private RequestQueue queue;
     // returns all item info for a specific character
     private String charInfoUrl;
 
+    // Holds values of the list view itself.
     LinearLayout llWrapper;
     ListView lvWrapper;
 
     // list adapter for equipment
     EquipCustomListAdapter eqclAdapter;
+
+    // Toggle to true after running parseCharacterInfo.
+    boolean characterGearDone = false;
 
 
 
@@ -97,7 +102,7 @@ public class CharacterInfo extends AppCompatActivity {
         Log.i("charInfo", "Character Name: " + charName + " | Account Name: " + acctName + " |Level: " + charLevel + " |Class: " + charClass);
         // provide our custom adapter the sorted item information
 
-        eqclAdapter = new EquipCustomListAdapter(this, sortedList);
+        eqclAdapter = new EquipCustomListAdapter(this, sortedListCopy);
         lvWrapper.setAdapter(eqclAdapter);
         request();
 
@@ -155,6 +160,10 @@ public class CharacterInfo extends AppCompatActivity {
      * Shows the name, level, quality.
      */
     public void populateGems() {
+
+        sortedListCopy.clear();
+        eqclAdapter.notifyDataSetChanged();
+
         // Loop through all items
         for (int i = 0; i < sortedList.size(); i++) {
             Item item = sortedList.get(i);
@@ -262,6 +271,19 @@ public class CharacterInfo extends AppCompatActivity {
 
             // Loop through every item in the json
             for (int itemCounter = 0; itemCounter < entriesArray.length(); itemCounter++) {
+
+                /**
+                 * Optional Fields not all items will have. Set after creating the item
+                 * */
+                String itemQuality = "";
+                String evasionRating = "";
+                String energyShield = "";
+                String armour = "";
+                String physicalDamage = "";
+                String criticalChance = "";
+                String attackSpeed = "";
+                String elementalDamage = "";
+
                 // the individual item objects
                 JSONObject itemInfo = entriesArray.getJSONObject(itemCounter);
 
@@ -338,6 +360,51 @@ public class CharacterInfo extends AppCompatActivity {
                         itemRarity = "Unique";
                     }
                 }
+
+                /**
+                 * Item Properties:
+                 * This contains quality, evasion rating, energy shield, armour in armour pieces
+                 * In weapons it has Physical Damage, Elemental Damage, crit chance, attacks per second,
+                 * weapon range. Also contains item type, aka "One Handed Sword" as opposed to just
+                 * the item base.
+                 *
+                 * Rings/Amulets/Belts do not have this information unless quality has been * As all values here are not always in
+                 * every item these will not be set in the constructor and instead set after creation.
+                 * */
+                if (itemInfo.has("properties")) {
+                    JSONArray itemProperties = itemInfo.getJSONArray("properties");
+                    // An individual property
+                    JSONObject property;
+
+                    // Go through all property objects grabbing the fields we need.
+                    for (int z = 0; z < itemProperties.length(); z++) {
+                        property = itemProperties.getJSONObject(z);
+
+                        // if we have the name field then check it has the value of quality or wanted field. Multiple name
+                        // fields in properties so must distinguish. All in random orders also.
+                        if (property.has("name") && property.getString("name").contains("Quality")) {
+                            itemQuality = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Evasion Rating")) {
+                            evasionRating = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Energy Shield")) {
+                            energyShield = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Armour")) {
+                            armour = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Physical Damage")) {
+                            physicalDamage = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Critical Strike Chance")) {
+                            criticalChance = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Attacks per Second")) {
+                            attackSpeed = extractLevelOrQuality(property);
+                        } else if (property.has("name") && property.getString("name").contains("Elemental Damage")) {
+                            elementalDamage = extractLevelOrQuality(property);
+                        }
+                    }
+
+                    Log.i("JSON", "Name: " + itemName + " PD: " + physicalDamage + " ED: " + elementalDamage + " CC: " + criticalChance + " AS: " + attackSpeed);
+
+                }
+
 
                 /**
                  * Find socketed jewels and/or gems
@@ -495,7 +562,17 @@ public class CharacterInfo extends AppCompatActivity {
 
                 // Add the item to our itemArray so we can later sort the order of them by values
                 Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems, itemRarity);
-                //Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
+
+                // Set the optional fields. In our Equipcustomlistadapter we will check if they are populated or not
+                individualItem.setItemQuality(itemQuality);
+                individualItem.setEvasionRating(evasionRating);
+                individualItem.setEnergyShield(energyShield);
+                individualItem.setArmour(armour);
+                individualItem.setPhysicalDamage(physicalDamage);
+                individualItem.setCriticalChance(criticalChance);
+                individualItem.setAttackSpeed(attackSpeed);
+                individualItem.setElementalDamage(elementalDamage);
+
                 itemArray.add(individualItem);
 
 
@@ -505,7 +582,18 @@ public class CharacterInfo extends AppCompatActivity {
             Log.d("charInfo", "Error: " + e);
 
         }
-        requestPassives();
+        /**
+         * If we haven't run this method the first time then continue onto getting our passive jewel
+         * information. If second time then sort our collection of items.
+         * */
+        if (characterGearDone == false) {
+            characterGearDone = true;
+            requestPassives();
+        } else {
+            itemArraySort();
+        }
+
+
     }
 
     /**
@@ -522,8 +610,8 @@ public class CharacterInfo extends AppCompatActivity {
             // Break the field into two fields split at the comma. First
             // entry into our List will be the level
             List<String> brokenDownString = Arrays.asList(newString.split(","));
-            // remove all non digit characters
-            String result = brokenDownString.get(0).replaceAll("\\D+", "");
+            // remove quotations
+            String result = brokenDownString.get(0).replace("\"", "");
             return result;
         } catch (JSONException e) {
             Log.i("json", "Error, ExtractLevelOrQuality: " + e);
@@ -533,215 +621,8 @@ public class CharacterInfo extends AppCompatActivity {
 
     }
 
-    /*
-     * Breaks down the passiveInfo JSON into Item objects which are then put into an arraylist.
-     * */
-    public void parsePassiveInfo(JSONObject response) {
-        try {
-            //Access the items array of the charInfo request
-            JSONArray entriesArray = response.getJSONArray("items");
-
-            // If entriesArray is empty that means no items equipped.
-            // End function and exit activity
-            if (entriesArray.length() == 0) {
-                Toast.makeText(getApplicationContext(), "No equipped items to show on " + charName, Toast.LENGTH_LONG).show();
-                finish();
-                return;
-            }
-
-            // initializing the values we will be using.
-            String itemName = "";
-            String itemType = "";
-            // the equipment slot
-            String inventoryId = "";
-            String itemIcon = "";
-
-            // Loop through every item in the json
-            for (int itemCounter = 0; itemCounter < entriesArray.length(); itemCounter++) {
-                // the individual item objects
-                JSONObject itemInfo = entriesArray.getJSONObject(itemCounter);
-
-                itemName = itemInfo.getString("name");
-                // Log.i("charInfo", "Item Name: " + itemName);
-                itemType = itemInfo.getString("typeLine");
-                if (itemInfo.has("abyssJewel")) {
-                    inventoryId = "abyssJewel";
-                    // Log.i("jewelz", "AbyssJewel: " + itemName);
-                } else {
-                    inventoryId = itemInfo.getString("inventoryId");
-                }
-
-
-                // image icon url
-                itemIcon = itemInfo.getString("icon");
-                // the json has backslashes that break url, this removes them.
-                itemIcon = itemIcon.replace("\\", "");
-
-                ArrayList<Gem> gems = new ArrayList<>();
-
-                /*
-                 * IMPLICIT MODS: Add each mod if any to the layout
-                 * */
-                JSONArray implicitMods = new JSONArray();
-                if (itemInfo.has("implicitMods")) {
-                    //The implicitMods
-                    implicitMods = itemInfo.getJSONArray("implicitMods");
-
-                }
-
-                /*
-                 * EXPLICIT MODS: Add each mod if any at all to the layout.
-                 * */
-                JSONArray explicitMods = new JSONArray();
-                if (itemInfo.has("explicitMods")) {
-                    explicitMods = itemInfo.getJSONArray("explicitMods");
-                    // Log.i("charInfo", explicitMods.toString());
-
-                }
-
-                /**
-                 *  ENCHANTMENTS: Check all for enchants
-                 * */
-                JSONArray enchantMods = new JSONArray();
-                if (itemInfo.has("enchantMods")) {
-                    enchantMods = itemInfo.getJSONArray("enchantMods");
-                    //Log.i("charInfo", enchantMods.toString());
-                }
-
-                /**
-                 *  Crafted Mods: Check all for crafted mods
-                 * */
-                JSONArray craftMods = new JSONArray();
-                if (itemInfo.has("craftedMods")) {
-                    craftMods = itemInfo.getJSONArray("craftedMods");
-                    //Log.i("charInfo", craftMods.toString());
-                }
-
-                /**
-                 * Find socketed jewels and/or gems
-                 * */
-                JSONArray socketedItems = new JSONArray();
-                if (itemInfo.has("socketedItems")) {
-                    socketedItems = itemInfo.getJSONArray("socketedItems");
-
-
-                    // check there are actual socketedItems and not an empty array.
-                    if (socketedItems.length() > 0) {
-
-                        String socketedItemName = "";
-                        String socketedItemType = "";
-                        String socketedItemInventoryId = "";
-                        String socketedItemIcon = "";
-                        // loop through all socketed items
-                        for (int x = 0; x < socketedItems.length(); x++) {
-                            //individual socketed item
-                            JSONObject socketedItemInfo = socketedItems.getJSONObject(x);
-
-                            // Checking for abyss jewels which will be handled like normal items
-                            if (socketedItemInfo.has("abyssJewel")) {
-
-
-                                socketedItemName = socketedItemInfo.getString("name");
-                                socketedItemType = socketedItemInfo.getString("typeLine");
-                                socketedItemInventoryId = "abyssJewel";
-                                // image icon url
-                                socketedItemIcon = socketedItemInfo.getString("icon");
-                                // the json has backslashes that break url, this removes them.
-                                socketedItemIcon = socketedItemIcon.replace("\\", "");
-
-                                /*
-                                 * IMPLICIT MODS: Add each mod if any to the layout
-                                 * */
-                                JSONArray socketedImplicitMods = new JSONArray();
-                                if (itemInfo.has("implicitMods")) {
-                                    //The implicitMods
-                                    socketedImplicitMods = itemInfo.getJSONArray("implicitMods");
-                                }
-
-                                /*
-                                 * EXPLICIT MODS: Add each mod if any at all to the layout.
-                                 * */
-                                JSONArray socketedExplicitMods = new JSONArray();
-                                if (itemInfo.has("explicitMods")) {
-                                    socketedExplicitMods = itemInfo.getJSONArray("explicitMods");
-                                }
-
-                                /**
-                                 *  ENCHANTMENTS: Check all for enchants
-                                 * */
-                                JSONArray socketedEnchantMods = new JSONArray();
-                                if (itemInfo.has("enchantMods")) {
-                                    socketedEnchantMods = itemInfo.getJSONArray("enchantMods");
-                                    //Log.i("charInfo", enchantMods.toString());
-                                }
-
-                                /**
-                                 *  Crafted Mods: Check all for crafted mods
-                                 * */
-                                JSONArray socketedCraftMods = new JSONArray();
-                                if (itemInfo.has("craftedMods")) {
-                                    socketedCraftMods = itemInfo.getJSONArray("craftedMods");
-                                    // Log.i("charInfo", craftMods.toString());
-                                }
-
-                                // the different rarities
-                                // frametype 0 = common, 1 = magic, 2 = rare, 3 = unique
-                                String socketedItemRarity = "Common";
-                                if (socketedItemInfo.has("frameType")) {
-                                    int frameType = socketedItemInfo.getInt("frameType");
-
-                                    if (frameType == 0) {
-                                        socketedItemRarity = "Common";
-                                    } else if (frameType == 1) {
-                                        socketedItemRarity = "Magic";
-                                    } else if (frameType == 2) {
-                                        socketedItemRarity = "Rare";
-                                    } else if (frameType == 3) {
-                                        socketedItemRarity = "Unique";
-                                    }
-                                }
-
-                                Item socketedIndividualItem = new Item(socketedItemIcon, socketedItemName, socketedItemType, socketedImplicitMods, socketedExplicitMods, socketedItemInventoryId, socketedEnchantMods, socketedCraftMods, gems, socketedItemRarity);
-                                itemArray.add(socketedIndividualItem);
-                            }
-                            //Log.i("socketItem", socketedItemInfo.toString());
-                        }
-
-                    }
-                }
-
-                // the different rarities
-                // frametype 0 = common, 1 = magic, 2 = rare, 3 = unique
-                String itemRarity = "Common";
-                if (itemInfo.has("frameType")) {
-                    int frameType = itemInfo.getInt("frameType");
-
-                    if (frameType == 0) {
-                        itemRarity = "Common";
-                    } else if (frameType == 1) {
-                        itemRarity = "Magic";
-                    } else if (frameType == 2) {
-                        itemRarity = "Rare";
-                    } else if (frameType == 3) {
-                        itemRarity = "Unique";
-                    }
-                }
-
-                // Add the item to our itemArray so we can later sort the order of them by values
-                Item individualItem = new Item(itemIcon, itemName, itemType, implicitMods, explicitMods, inventoryId, enchantMods, craftMods, gems, itemRarity);
-                //Log.i("jewelz", "Jewel Info: " + individualItem.getName() + " " + individualItem.getInventoryId());
-                itemArray.add(individualItem);
-
-
-            }
-
-        } catch (JSONException e) {
-            Log.d("charInfo", "Error: " + e);
-
-        }
-        itemArraySort();
-    }
-    // Requests the passive tree information for the purpose of
+    // Requests the passive tree information for grabbing socketed in skill tree jewels
+    // then call our characterInfo parsing method.
     public void requestPassives() {
 
         charInfoUrl = "https://www.pathofexile.com/character-window/get-passive-skills?character=" + charName + "&accountName=" + acctName;
@@ -752,7 +633,7 @@ public class CharacterInfo extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
 
-                        parsePassiveInfo(response);
+                        parseCharacterInfo(response);
 
                     }
                 }, new Response.ErrorListener() {
@@ -917,23 +798,14 @@ public class CharacterInfo extends AppCompatActivity {
 
             }
         }
+        // fill our copy with the results.
+        sortedListCopy.addAll(sortedList);
+
         // update the listview
-
         eqclAdapter.notifyDataSetChanged();
-        //lvWrapper.setAdapter(eqclAdapter);
         Log.i("adapter", Integer.toString(eqclAdapter.getCount()));
-        //Log.i("lv", sortedList.get(0).getName());
-        // Logging the list of sorted items
-        //for (int i = 0; i < sortedList.size(); i++) {
-        //   Log.i("sort", "Sorted: " + sortedList.get(i).getInventoryId() + " " + i);
-        //}
 
-        // Logging the list of sorted items
-        //for (int i = 0; i < itemArray.size(); i++) {
-        //   Log.i("unsort", "Unsorted: " + itemArray.get(i).getInventoryId() + " " + i);
-        //}
-
-        //TEMP populateCharacterInfo();
+        //populateGems();
     }
 
 }

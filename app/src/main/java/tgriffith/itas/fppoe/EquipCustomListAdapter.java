@@ -1,6 +1,9 @@
 package tgriffith.itas.fppoe;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.Paint;
+import android.text.Html;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -17,6 +20,7 @@ import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -72,6 +76,118 @@ public class EquipCustomListAdapter extends ArrayAdapter {
             eqItemName.setTextColor(ContextCompat.getColor(context, R.color.rarityUnique));
         }
 
+        // Adding quality. Check it has a non default value.
+        if (!item.getItemQuality().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Quality: </font>";
+            String value = "<font color='#8787fe'>" + item.getItemQuality() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        //Evasion Rating
+        if (!item.getEvasionRating().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Evasion Rating: </font>";
+            String value = "<font color='#8787fe'>" + item.getEvasionRating() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        // Energy Shield
+        if (!item.getEnergyShield().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Energy Shield: </font>";
+            String value = "<font color='#8787fe'>" + item.getEnergyShield() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        // Armour
+        if (!item.getArmour().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Armour: </font>";
+            String value = "<font color='#8787fe'>" + item.getArmour() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        // Physical Damage
+        if (!item.getPhysicalDamage().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Physical Damage: </font>";
+            String value = "<font color='#8787fe'>" + item.getPhysicalDamage() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        // Elemental Damage
+        if (!item.getElementalDamage().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Elemental Damage: </font>";
+            String value = "<font color='#8787fe'>" + item.getElementalDamage() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        // Critical Strike Chance
+        if (!item.getCriticalChance().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Critical Strike Chance: </font>";
+            String value = "<font color='#8787fe'>" + item.getCriticalChance() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
+        // Attack Speed
+        if (!item.getAttackSpeed().equals("")) {
+            TextView iTest = new TextView(context);
+            // Setting two different colors for one textview. Easiest found way was using html.
+            // so we copied the hexcode from our colors.xml. They are itemBaseStats and itemTextBlue
+            // we are using
+            String field = "<font color='#7f7f7f'>Attack Speed: </font>";
+            String value = "<font color='#8787fe'>" + item.getAttackSpeed() + "</font>";
+
+            iTest.setText(Html.fromHtml(field + value));
+            iTest.setPadding(10, 0, 15, 0);
+            itemInfoll.addView(iTest);
+        }
+
 
         /**
          * Add enchant info
@@ -87,7 +203,7 @@ public class EquipCustomListAdapter extends ArrayAdapter {
                 TextView iTest = new TextView(context);
                 try {
                     iTest.setText(enchantMods.get(j).toString());
-                    iTest.setPadding(10, 0, 15, 0);
+                    iTest.setPadding(10, 10, 15, 0);
                     iTest.setTextColor(ContextCompat.getColor(context, R.color.enchantBlue));
                 } catch (JSONException e) {
                     Log.d("json", "Error: " + e);
@@ -112,12 +228,20 @@ public class EquipCustomListAdapter extends ArrayAdapter {
                 TextView iTest = new TextView(context);
                 try {
                     iTest.setText(implicitMods.get(j).toString());
-                    iTest.setPadding(10, 0, 15, 0);
+                    iTest.setPadding(10, 5, 15, 0);
                     iTest.setTextColor(ContextCompat.getColor(context, R.color.itemTextBlue));
                 } catch (JSONException e) {
                     Log.d("json", "Error: " + e);
                 }
+
                 itemInfoll.addView(iTest);
+
+                // If this is the last implicit add more padding to the bottom
+                if (j == implicitMods.length() - 1) {
+                    iTest.setPadding(10, 0, 15, 5);
+
+                }
+
             }
         }
 

@@ -22,6 +22,18 @@ public class Item {
     public ArrayList<Gem> gems;
     public String rarity;
 
+    /**
+     * Optional Fields
+     */
+    String itemQuality = "";
+    String evasionRating = "";
+    String energyShield = "";
+    String armour = "";
+    String physicalDamage = "";
+    String criticalChance = "";
+    String attackSpeed = "";
+    String elementalDamage = "";
+
     public Item(String imageUrl, String name, String typeLine, JSONArray implicitMods, JSONArray explicitMods, String inventoryId, JSONArray enchantMods, JSONArray craftedMods, ArrayList<Gem> gems, String rarity) {
         this.imageUrl = imageUrl;
         this.name = name;
@@ -33,6 +45,70 @@ public class Item {
         this.craftedMods = craftedMods;
         this.gems = gems;
         this.rarity = rarity;
+    }
+
+    public String getItemQuality() {
+        return itemQuality;
+    }
+
+    public void setItemQuality(String itemQuality) {
+        this.itemQuality = itemQuality;
+    }
+
+    public String getEvasionRating() {
+        return evasionRating;
+    }
+
+    public void setEvasionRating(String evasionRating) {
+        this.evasionRating = evasionRating;
+    }
+
+    public String getEnergyShield() {
+        return energyShield;
+    }
+
+    public void setEnergyShield(String energyShield) {
+        this.energyShield = energyShield;
+    }
+
+    public String getArmour() {
+        return armour;
+    }
+
+    public void setArmour(String armour) {
+        this.armour = armour;
+    }
+
+    public String getPhysicalDamage() {
+        return physicalDamage;
+    }
+
+    public void setPhysicalDamage(String physicalDamage) {
+        this.physicalDamage = physicalDamage;
+    }
+
+    public String getCriticalChance() {
+        return criticalChance;
+    }
+
+    public void setCriticalChance(String criticalChance) {
+        this.criticalChance = criticalChance;
+    }
+
+    public String getAttackSpeed() {
+        return attackSpeed;
+    }
+
+    public void setAttackSpeed(String attackSpeed) {
+        this.attackSpeed = attackSpeed;
+    }
+
+    public String getElementalDamage() {
+        return elementalDamage;
+    }
+
+    public void setElementalDamage(String elementalDamage) {
+        this.elementalDamage = elementalDamage;
     }
 
     public ArrayList<Gem> getGems() {
