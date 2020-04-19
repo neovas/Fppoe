@@ -11,6 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:background="@color/spinnerbglighter"
         app:layout_constraintBottom_toTopOf="@+id/eqListview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,8 +28,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingLeft="5dp"
                 android:text="Character Name "
-                android:textSize="18dp"
+                android:textSize="18sp"
                 app:autoSizeMaxTextSize="50dp"
                 app:autoSizeMinTextSize="20dp" />
 
@@ -37,8 +39,9 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:paddingLeft="5dp"
                 android:text="Level 100 - Ascendant"
-                android:textSize="15dp"
+                android:textSize="15sp"
                 app:autoSizeMaxTextSize="50dp"
                 app:autoSizeMinTextSize="20dp" />
         </LinearLayout>
@@ -48,12 +51,13 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/spinnerbg"
+            android:background="@color/spinnerbglighter"
             android:gravity="center"
             android:text="View Gems"
             android:textAlignment="center"
             android:textColor="@color/dkPText"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
@@ -61,6 +65,8 @@
         android:id="@+id/eqListview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:listSelector="@android:color/transparent"
+        android:paddingLeft="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="spinnerbg">#2E2E2E</color>
+    <color name="spinngbgdarker">#292929</color>
+    <color name="spinnerbglighter">#424242</color>
     <color name="dkPText">#A1A1A1</color>
     <color name="onlineGreen">#ff669900</color>
     <color name="deadRed">#ffcc0000</color>
@@ -14,4 +16,5 @@
     <color name="rarityRare">#fefe76</color>
     <color name="rarityUnique">#af5e1c</color>
     <color name="itemBaseStats">#7f7f7f</color>
+    <color name="itemLink">#A6885B</color>
 </resources>

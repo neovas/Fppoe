@@ -130,9 +130,11 @@ public class CharacterInfo extends AppCompatActivity {
             public void onClick(View v) {
                 if (toggleButtonFlag == false) {
                     lvWrapper.setAdapter(gemAdapter);
+                    lvWrapper.setDividerHeight(0);
                     toggleButton.setText("View Gear");
                     toggleButtonFlag = true;
                 } else {
+                    lvWrapper.setDividerHeight(10);
                     lvWrapper.setAdapter(eqclAdapter);
                     toggleButton.setText("View Gems");
 
@@ -497,7 +499,7 @@ public class CharacterInfo extends AppCompatActivity {
                                 // Create our gem and add to the gem array.
                                 Gem individualGem = new Gem(socketedItemType, socketedItemIcon, gemQuality, gemLevel, groupNumber, inventoryId);
                                 gems.add(individualGem);
-                                gemList.add(individualGem);
+                                //gemList.add(individualGem);
 
                                 for (int z = 0; z < gems.size(); z++) {
                                     //Log.i("gemsArray", "Gem: " + gems.get(z).typeLine + " " + gems.get(z).getGroupNum());
@@ -630,6 +632,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Weapon")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -638,6 +641,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Offhand")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -646,6 +650,8 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Helm")) {
                 sortedList.add(item);
+
+                gemAdd(item);
             }
         }
 
@@ -654,6 +660,8 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("BodyArmour")) {
                 sortedList.add(item);
+
+                gemAdd(item);
             }
         }
 
@@ -662,6 +670,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Gloves")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -670,6 +679,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Boots")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -678,6 +688,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Belt")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -686,6 +697,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Amulet")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -694,6 +706,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Ring")) {
                 sortedList.add(item);
+                gemAdd(item);
 
             }
         }
@@ -703,6 +716,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Ring2")) {
                 sortedList.add(item);
+                gemAdd(item);
 
             }
         }
@@ -712,6 +726,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Flask")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -720,6 +735,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("abyssJewel")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -728,6 +744,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("PassiveJewels")) {
                 sortedList.add(item);
+                gemAdd(item);
             }
         }
 
@@ -736,6 +753,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Weapon2")) {
                 sortedList.add(item);
+                gemAdd(item);
 
             }
         }
@@ -745,6 +763,7 @@ public class CharacterInfo extends AppCompatActivity {
 
             if (item.getInventoryId().equals("Offhand2")) {
                 sortedList.add(item);
+                gemAdd(item);
 
             }
         }
@@ -756,6 +775,18 @@ public class CharacterInfo extends AppCompatActivity {
         Log.i("adapter", Integer.toString(eqclAdapter.getCount()));
 
         //populateGems();
+    }
+
+    /*
+     * Takes an item, checks for the existence of gems and then adds them to a gemArray
+     * */
+    public void gemAdd(Item item) {
+        // if item has gems, add all into gem array
+        if (item.getGems().size() > 0) {
+            for (int j = 0; j < item.getGems().size(); j++) {
+                gemList.add(item.getGems().get(j));
+            }
+        }
     }
 
 }
