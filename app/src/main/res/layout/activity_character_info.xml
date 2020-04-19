@@ -6,32 +6,56 @@
     android:layout_height="match_parent"
     tools:context=".CharacterInfo">
 
-    <TextView
-        android:id="@+id/charAccTv"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Character Name - Account Name"
-        android:textSize="18dp"
-        app:autoSizeMaxTextSize="50dp"
-        app:autoSizeMinTextSize="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/classLevelTv"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/eqListview"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/classLevelTv"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Level 100 - Ascendant"
-        android:textSize="15dp"
-        app:autoSizeMaxTextSize="50dp"
-        app:autoSizeMinTextSize="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/charAccTv" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/charAccTv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Character Name "
+                android:textSize="18dp"
+                app:autoSizeMaxTextSize="50dp"
+                app:autoSizeMinTextSize="20dp" />
+
+            <TextView
+                android:id="@+id/classLevelTv"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Level 100 - Ascendant"
+                android:textSize="15dp"
+                app:autoSizeMaxTextSize="50dp"
+                app:autoSizeMinTextSize="20dp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/toggleButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/spinnerbg"
+            android:gravity="center"
+            android:text="View Gems"
+            android:textAlignment="center"
+            android:textColor="@color/dkPText"
+            android:textSize="18sp" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/eqListview"
@@ -39,8 +63,9 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/classLevelTv" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

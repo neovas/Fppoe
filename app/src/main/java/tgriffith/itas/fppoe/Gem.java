@@ -7,13 +7,19 @@ public class Gem {
     public String quality;
     public String level;
     public int groupNum;
+    public String equipmentType;
 
-    public Gem(String typeLine, String icon, String quality, String level, int groupNum) {
+    public Gem(String typeLine, String icon, String quality, String level, int groupNum, String equipmentType) {
         this.typeLine = typeLine;
         this.icon = icon;
         this.quality = quality;
         this.level = level;
         this.groupNum = groupNum;
+        this.equipmentType = equipmentType;
+    }
+
+    public String getEquipmentType() {
+        return equipmentType;
     }
 
     public String getTypeLine() {

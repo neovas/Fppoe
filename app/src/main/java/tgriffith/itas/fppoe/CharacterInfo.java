@@ -13,6 +13,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -56,6 +57,7 @@ public class CharacterInfo extends AppCompatActivity {
     ArrayList<Item> itemArray = new ArrayList<Item>();
     ArrayList<Item> sortedList = new ArrayList<>();
     ArrayList<Item> sortedListCopy = new ArrayList<>();
+    ArrayList<Gem> gemList = new ArrayList<>();
 
     private RequestQueue queue;
     // returns all item info for a specific character
@@ -67,9 +69,17 @@ public class CharacterInfo extends AppCompatActivity {
 
     // list adapter for equipment
     EquipCustomListAdapter eqclAdapter;
+    // adapter for showing our gems
+    GemCustomListAdapter gemAdapter;
+
 
     // Toggle to true after running parseCharacterInfo.
     boolean characterGearDone = false;
+
+    //Our button
+    Button toggleButton;
+    // False for on gear screen. True for gem screen.
+    boolean toggleButtonFlag = false;
 
 
 
@@ -92,8 +102,12 @@ public class CharacterInfo extends AppCompatActivity {
         TextView charAccTv = findViewById(R.id.charAccTv);
         TextView classLevelTv = findViewById(R.id.classLevelTv);
 
+        toggleButton = findViewById(R.id.toggleButton);
+
         //llWrapper = findViewById(R.id.llItemsContainer);
         lvWrapper = findViewById(R.id.eqListview);
+        lvWrapper.setDivider(null);
+        lvWrapper.setDividerHeight(0);
 
         charAccTv.setText(charName);
         classLevelTv.setText(charLevel + " - " + charClass);
@@ -102,11 +116,32 @@ public class CharacterInfo extends AppCompatActivity {
         Log.i("charInfo", "Character Name: " + charName + " | Account Name: " + acctName + " |Level: " + charLevel + " |Class: " + charClass);
         // provide our custom adapter the sorted item information
 
-        eqclAdapter = new EquipCustomListAdapter(this, sortedListCopy);
+        eqclAdapter = new EquipCustomListAdapter(this, sortedList);
+        gemAdapter = new GemCustomListAdapter(this, gemList);
+
+        // set to our equipment adapter by default. Will toggle this with button.
         lvWrapper.setAdapter(eqclAdapter);
         request();
 
-        eqclAdapter.notifyDataSetChanged();
+        // When our button is tapped change from gear screen to gem screen.
+        // When tapped again swap back.
+        toggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (toggleButtonFlag == false) {
+                    lvWrapper.setAdapter(gemAdapter);
+                    toggleButton.setText("View Gear");
+                    toggleButtonFlag = true;
+                } else {
+                    lvWrapper.setAdapter(eqclAdapter);
+                    toggleButton.setText("View Gems");
+
+                    toggleButtonFlag = false;
+                }
+
+            }
+        });
+        //eqclAdapter.notifyDataSetChanged();
 
 
 
@@ -148,103 +183,17 @@ public class CharacterInfo extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Cannot access account. Marked as private.", Toast.LENGTH_LONG).show();
                             finish();
                         }
+                        // Resource not found
+                        if (error.networkResponse.statusCode == 404) {
+                            Toast.makeText(getApplicationContext(), "404. Resource not found.", Toast.LENGTH_LONG).show();
+                            finish();
+                        }
                     }
                 });
 
         queue.add(jsonObjectRequest);
     }
 
-    /**
-     * Display all gems to our user.
-     * Breaks them down by item and then further by link
-     * Shows the name, level, quality.
-     */
-    public void populateGems() {
-
-        sortedListCopy.clear();
-        eqclAdapter.notifyDataSetChanged();
-
-        // Loop through all items
-        for (int i = 0; i < sortedList.size(); i++) {
-            Item item = sortedList.get(i);
-
-            // Confirm it has gems
-            if (item.getGems().size() > 0) {
-
-                // Store item type. e.g. "Body Armour"
-                TextView itemType = new TextView(getApplicationContext());
-
-                // The LL which holds the gem information. Add to our wrapper
-                LinearLayout childLl = new LinearLayout(getApplicationContext());
-                childLl.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                childLl.setOrientation(LinearLayout.VERTICAL);
-                childLl.setPadding(25, 0, 25, 10);
-                llWrapper.addView(childLl);
-
-
-                itemType.setText(item.getInventoryId());
-                itemType.setPadding(0, 5, 0, 5);
-                itemType.setTypeface(null, Typeface.BOLD);
-
-                childLl.addView(itemType);
-
-                int nextGroup = 0;
-                int curGroup = 0;
-
-                // loop through all gems in the item
-                for (int j = 0; j < item.getGems().size(); j++) {
-
-                    // create line for first gem
-                    if (j == 0) {
-                        // create a line seperating our socket groups
-                        View line = new View(getApplicationContext());
-                        line.setBackgroundColor(Color.BLACK);
-                        line.setPadding(0, 15, 0, 15);
-                        childLl.addView(line, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 2));
-                    }
-
-                    // the individual gem
-                    Gem gem = item.getGems().get(j);
-
-                    //current gem's group
-                    curGroup = gem.getGroupNum();
-                    //next gem's group
-                    // make sure we aren't getting a null reference
-                    if (j + 1 < item.getGems().size()) {
-                        nextGroup = item.getGems().get(j + 1).getGroupNum();
-                    }
-
-
-                    //Display gem info
-                    TextView gemName = new TextView(getApplicationContext());
-                    gemName.setText(gem.getLevel() + "/" + gem.getQuality() + " " + gem.getTypeLine());
-
-
-                    childLl.addView(gemName);
-
-                    // if the next group is larger than our current this is a different link
-                    // draw a line between groups
-                    if (nextGroup > curGroup) {
-                        // create a line seperating our socket groups
-                        View line = new View(getApplicationContext());
-                        line.setBackgroundColor(Color.BLACK);
-                        line.setPadding(0, 15, 0, 15);
-                        childLl.addView(line, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 2));
-                    }
-
-                    // add line for last gem listed.
-                    if (j + 1 == item.getGems().size()) {
-                        // create a line seperating our socket groups
-                        View line = new View(getApplicationContext());
-                        line.setBackgroundColor(Color.BLACK);
-                        line.setPadding(0, 15, 0, 15);
-                        childLl.addView(line, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, 2));
-                    }
-                }
-
-            }
-        }
-    }
 
     /*
      * Breaks down the characterInfo JSON into Item objects which are then put into an arraylist.
@@ -546,8 +495,9 @@ public class CharacterInfo extends AppCompatActivity {
                                 //Log.i("jsonTest", "Item: " + itemType + "Gem: " + socketedItemType + " Group: " + socketGroupNumber);
 
                                 // Create our gem and add to the gem array.
-                                Gem individualGem = new Gem(socketedItemType, socketedItemIcon, gemQuality, gemLevel, groupNumber);
+                                Gem individualGem = new Gem(socketedItemType, socketedItemIcon, gemQuality, gemLevel, groupNumber, inventoryId);
                                 gems.add(individualGem);
+                                gemList.add(individualGem);
 
                                 for (int z = 0; z < gems.size(); z++) {
                                     //Log.i("gemsArray", "Gem: " + gems.get(z).typeLine + " " + gems.get(z).getGroupNum());

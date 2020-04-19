@@ -3,13 +3,13 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="spinnerbg">#2e2e2e</color>
-    <color name="dkPText">#a1a1a1</color>
+    <color name="spinnerbg">#2E2E2E</color>
+    <color name="dkPText">#A1A1A1</color>
     <color name="onlineGreen">#ff669900</color>
     <color name="deadRed">#ffcc0000</color>
     <color name="enchantBlue">#88a2b2</color>
     <color name="itemTextBlue">#8787fe</color>
-    <color name="rarityCommon">#c8c8c8</color>
+    <color name="rarityCommon">#C8C8C8</color>
     <color name="rarityMagic">#8787fe</color>
     <color name="rarityRare">#fefe76</color>
     <color name="rarityUnique">#af5e1c</color>
