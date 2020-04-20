@@ -671,6 +671,7 @@ public class CharacterInfo extends AppCompatActivity {
             if (item.getInventoryId().equals("Gloves")) {
                 sortedList.add(item);
                 gemAdd(item);
+
             }
         }
 
@@ -734,6 +735,7 @@ public class CharacterInfo extends AppCompatActivity {
             Item item = itemArray.get(i);
 
             if (item.getInventoryId().equals("abyssJewel")) {
+                item.gems.clear();
                 sortedList.add(item);
                 gemAdd(item);
             }
@@ -774,6 +776,11 @@ public class CharacterInfo extends AppCompatActivity {
         eqclAdapter.notifyDataSetChanged();
         Log.i("adapter", Integer.toString(eqclAdapter.getCount()));
 
+        //for (int i = 0; i < gemList.size(); i++){
+        //   Log.i("duplicate", "Gems: " + gemList.get(i).getTypeLine());
+        //}
+
+
         //populateGems();
     }
 
@@ -782,9 +789,12 @@ public class CharacterInfo extends AppCompatActivity {
      * */
     public void gemAdd(Item item) {
         // if item has gems, add all into gem array
-        if (item.getGems().size() > 0) {
+        if (item.getGems().size() >= 0) {
             for (int j = 0; j < item.getGems().size(); j++) {
+                Log.i("duplicate", "Gems: " + item.getGems().get(j).getTypeLine() + " " + item.getInventoryId());
                 gemList.add(item.getGems().get(j));
+
+
             }
         }
     }
