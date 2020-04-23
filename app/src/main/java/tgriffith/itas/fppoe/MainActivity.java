@@ -43,15 +43,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-/**
- * TODO:
- * 2. If account search doesn't find a result toast the user telling them.
- * 4. Select default league to load on launch.
- * 5. Tap entry to view character's equipped gear, gems, etc.
- * 6. Set favorite accounts/characters to follow?
- */
-
-
 public class MainActivity extends AppCompatActivity {
     // stores the league selected from the spinner
     private String selectedLeague = "Standard";
@@ -86,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Flag representing if the user is searching for an account or doing regular ladder search
     Boolean isAccountSearch = false;
+
+    // Stores the characterInfo which will be acquired on character entry tap
+    JSONObject characterInformation;
+
+    // check for successful characterInformation api request
+    Boolean gotCharInfo = false;
 
 
     // Stores the name, info and rank values which
@@ -300,24 +297,88 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // store the selected entry's character name and account name
-                String listRowName = nameArray.get(position);
-                String listRowAccount = accountNameArray.get(position);
-                String listRowLevel = characterLevelArray.get(position);
-                String listRowClass = characterClassArray.get(position);
 
-                // create our intent and pass the char name and acct names to our activity.
-                Intent characterIntent = new Intent(getApplicationContext(), CharacterInfo.class);
-                characterIntent.putExtra("characterName", listRowName);
-                characterIntent.putExtra("accountName", listRowAccount);
-                characterIntent.putExtra("characterLevel", listRowLevel);
-                characterIntent.putExtra("characterClass", listRowClass);
+                requestCharInfo(position);
 
-                startActivity(characterIntent);
+
 
             }
         });
 
+    }
+
+    /**
+     * Requests the equipped gear of the character provided a character name and account name.
+     */
+    public void requestCharInfo(int position) {
+        int row = position;
+        final String listRowName = nameArray.get(position);
+        final String listRowAccount = accountNameArray.get(position);
+        final String listRowLevel = characterLevelArray.get(position);
+        final String listRowClass = characterClassArray.get(position);
+
+        String charInfoUrl = "https://www.pathofexile.com/character-window/get-items?character=" + listRowName + "&accountName=" + listRowAccount;
+        Log.i("charInfo", charInfoUrl);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                (Request.Method.GET, charInfoUrl, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        // create our intent and pass the char name and acct names to our activity.
+                        Intent characterIntent = new Intent(getApplicationContext(), CharacterInfo.class);
+                        characterIntent.putExtra("characterName", listRowName);
+                        characterIntent.putExtra("accountName", listRowAccount);
+                        characterIntent.putExtra("characterLevel", listRowLevel);
+                        characterIntent.putExtra("characterClass", listRowClass);
+                        characterIntent.putExtra("characterInformation", response.toString());
+
+                        try {
+                            JSONArray itemEntry = response.getJSONArray("items");
+
+                            if (itemEntry.length() == 0) {
+                                Toast.makeText(getApplicationContext(), "No equipped items to show on " + listRowName, Toast.LENGTH_LONG).show();
+                            } else {
+                                startActivity(characterIntent);
+                            }
+
+                        } catch (JSONException e) {
+                            Log.i("JSONE", e.toString());
+                        }
+
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.i("charInfo", "Error Code: " + error.networkResponse.statusCode);
+                        Log.i("charInfo", "error :" + error.toString());
+                        /**
+                         * Check for error 503 network response. This is the error thrown when
+                         * game/website is down. Toast the user telling them servers cannot be reached.
+                         * */
+                        if (error.networkResponse.statusCode == 503) {
+                            Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_LONG).show();
+                        }
+                        /**
+                         * 403 response generally is due to the account being marked as private.
+                         * Close the activity
+                         * */
+                        if (error.networkResponse.statusCode == 403) {
+                            Toast.makeText(getApplicationContext(), "Cannot access account. Marked as private.", Toast.LENGTH_LONG).show();
+                            // finish();
+                        }
+                        // Resource not found
+                        if (error.networkResponse.statusCode == 404) {
+                            Toast.makeText(getApplicationContext(), "404. Resource not found.", Toast.LENGTH_LONG).show();
+                            //finish();
+                        }
+                        gotCharInfo = false;
+                    }
+                });
+
+        queue.add(jsonObjectRequest);
     }
 
     /**

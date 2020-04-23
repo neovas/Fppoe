@@ -53,6 +53,9 @@ public class CharacterInfo extends AppCompatActivity {
     String charName;
     String acctName;
 
+    //Stores the charInfo json from main activity's request.
+    JSONObject characterInformation;
+
     // Storing each item in this array.
     ArrayList<Item> itemArray = new ArrayList<Item>();
     ArrayList<Item> sortedList = new ArrayList<>();
@@ -96,6 +99,13 @@ public class CharacterInfo extends AppCompatActivity {
         // Grabbing the values from our mainactivity's selected entry on ladder
         charName = flagIntent.getStringExtra("characterName");
         acctName = flagIntent.getStringExtra("accountName");
+
+        try {
+            characterInformation = new JSONObject(flagIntent.getStringExtra("characterInformation"));
+        } catch (JSONException e) {
+            Log.i("JSON", e.toString());
+        }
+
         String charLevel = flagIntent.getStringExtra("characterLevel");
         String charClass = flagIntent.getStringExtra("characterClass");
 
@@ -121,7 +131,9 @@ public class CharacterInfo extends AppCompatActivity {
 
         // set to our equipment adapter by default. Will toggle this with button.
         lvWrapper.setAdapter(eqclAdapter);
-        request();
+        // Parse the JSONObject with equipment, if that runs correctly then it will sort and populate
+        // ui with the information.
+        parseCharacterInfo(characterInformation);
 
         // When our button is tapped change from gear screen to gem screen.
         // When tapped again swap back.
@@ -176,6 +188,7 @@ public class CharacterInfo extends AppCompatActivity {
                          * */
                         if (error.networkResponse.statusCode == 503) {
                             Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_LONG).show();
+                            finish();
                         }
                         /**
                          * 403 response generally is due to the account being marked as private.
@@ -207,11 +220,9 @@ public class CharacterInfo extends AppCompatActivity {
 
             // If entriesArray is empty that means no items equipped.
             // End function and exit activity
-            if (entriesArray.length() == 0) {
-                Toast.makeText(getApplicationContext(), "No equipped items to show on " + charName, Toast.LENGTH_LONG).show();
-                finish();
-                return;
-            }
+            //if (entriesArray.length() == 0) {
+            //    Toast.makeText(getApplicationContext(), "No equipped items to show on " + charName, Toast.LENGTH_LONG).show();
+            //}
 
             // initializing the values we will be using.
             String itemName = "";
