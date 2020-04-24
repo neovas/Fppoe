@@ -1,8 +1,11 @@
 package tgriffith.itas.fppoe;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,7 +41,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -52,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
 
     // the lowest spot visible on ladder. 15k at moment of programming.
     int ladderMaxSize = 15000;
+
+    // Storing our toast message so we can clear it earlier if needed.
+    Toast toastMessage;
 
     private String ladderUrl = "https://api.pathofexile.com/ladders/" + selectedLeague + "?limit=200&offset=" + ladderOffset;
 
@@ -69,17 +78,12 @@ public class MainActivity extends AppCompatActivity {
     // https://www.bignerdranch.com/blog/implementing-swipe-to-refresh-an-android-material-design-ui-pattern/
     SwipeRefreshLayout mSwipeRefreshLayout;
 
-
     // The searched accountName. This allows us to pass the accountName variable into
     // tablePopulate when doing a search. This is due to lack of info in the account search json.
     String searchedAccountName;
 
-
     // Flag representing if the user is searching for an account or doing regular ladder search
     Boolean isAccountSearch = false;
-
-    // Stores the characterInfo which will be acquired on character entry tap
-    JSONObject characterInformation;
 
     // check for successful characterInformation api request
     Boolean gotCharInfo = false;
@@ -123,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         clAdapter = new CustomListAdapter(this, nameArray, infoArray, rankArray, onlineStatusArray, deathStatusArray);
         //bind the two
         listView.setAdapter(clAdapter);
+
 
         /**
          * When swiping to refresh clear variables and refresh the ladder.
@@ -215,6 +220,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // https://stackoverflow.com/questions/31749210/searchview-seticonifiedfalse-automatically-calls-the-focus-for-the-searchview
+        // Fixes issue where searchView is focused on automatically.
+        searchView.setFocusable(false);
+        searchView.setIconified(false);
+        searchView.clearFocus();
+
         // searchVIew listener.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -300,8 +311,6 @@ public class MainActivity extends AppCompatActivity {
 
                 requestCharInfo(position);
 
-
-
             }
         });
 
@@ -337,7 +346,11 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray itemEntry = response.getJSONArray("items");
 
                             if (itemEntry.length() == 0) {
-                                Toast.makeText(getApplicationContext(), "No equipped items to show on " + listRowName, Toast.LENGTH_LONG).show();
+                                // if user is tapping new entries clear previous toast that may be there.
+                                if (toastMessage != null) {
+                                    toastMessage.cancel();
+                                }
+                                Toast.makeText(getApplicationContext(), "No equipped items to show on " + listRowName, Toast.LENGTH_SHORT).show();
                             } else {
                                 startActivity(characterIntent);
                             }
@@ -359,20 +372,30 @@ public class MainActivity extends AppCompatActivity {
                          * game/website is down. Toast the user telling them servers cannot be reached.
                          * */
                         if (error.networkResponse.statusCode == 503) {
-                            Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_LONG).show();
+                            // if user is tapping new entries clear previous toast that may be there.
+                            if (toastMessage != null) {
+                                toastMessage.cancel();
+                            }
+                            Toast.makeText(getApplicationContext(), "Game servers cannot be reached currently. Try again later.", Toast.LENGTH_SHORT).show();
                         }
                         /**
                          * 403 response generally is due to the account being marked as private.
                          * Close the activity
                          * */
                         if (error.networkResponse.statusCode == 403) {
-                            Toast.makeText(getApplicationContext(), "Cannot access account. Marked as private.", Toast.LENGTH_LONG).show();
-                            // finish();
+                            // if user is tapping new entries clear previous toast that may be there.
+                            if (toastMessage != null) {
+                                toastMessage.cancel();
+                            }
+                            Toast.makeText(getApplicationContext(), "Cannot access account. Marked as private.", Toast.LENGTH_SHORT).show();
                         }
                         // Resource not found
                         if (error.networkResponse.statusCode == 404) {
-                            Toast.makeText(getApplicationContext(), "404. Resource not found.", Toast.LENGTH_LONG).show();
-                            //finish();
+                            // if user is tapping new entries clear previous toast that may be there.
+                            if (toastMessage != null) {
+                                toastMessage.cancel();
+                            }
+                            Toast.makeText(getApplicationContext(), "404. Resource not found.", Toast.LENGTH_SHORT).show();
                         }
                         gotCharInfo = false;
                     }
@@ -503,4 +526,5 @@ public class MainActivity extends AppCompatActivity {
             Log.d("ladder", "Error: " + e);
         }
     }
+
 }

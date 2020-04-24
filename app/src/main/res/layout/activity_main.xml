@@ -8,14 +8,17 @@
 
     <Spinner
         android:id="@+id/leagueSpinner"
-        android:layout_width="210dp"
+        android:layout_width="wrap_content"
         android:layout_height="75dp"
-        android:prompt="@string/spinner_title"
-        android:spinnerMode="dropdown"
         android:background="@color/spinnerbg"
+        android:gravity="center"
         android:popupBackground="@color/spinnerbg"
         android:popupTheme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
+        android:prompt="@string/spinner_title"
+        android:spinnerMode="dropdown"
+        android:textAlignment="center"
         android:textAppearance="@color/dkPText"
+        app:layout_constraintEnd_toStartOf="@+id/accountSearchID"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

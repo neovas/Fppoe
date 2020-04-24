@@ -64,6 +64,7 @@ public class EquipCustomListAdapter extends ArrayAdapter {
 
         // add name and typeline of item
         eqItemName.setText(item.getName() + " " + item.getTypeLine());
+        eqItemName.setPadding(10, 0, 15, 0);
 
         // set the color of the item name to be the same as the rarity colors in game
         if (item.getRarity() == "Common") {
@@ -228,7 +229,7 @@ public class EquipCustomListAdapter extends ArrayAdapter {
                 TextView iTest = new TextView(context);
                 try {
                     iTest.setText(implicitMods.get(j).toString());
-                    iTest.setPadding(10, 5, 15, 0);
+                    iTest.setPadding(10, 0, 15, 0);
                     iTest.setTextColor(ContextCompat.getColor(context, R.color.itemTextBlue));
                 } catch (JSONException e) {
                     Log.d("json", "Error: " + e);
@@ -238,7 +239,7 @@ public class EquipCustomListAdapter extends ArrayAdapter {
 
                 // If this is the last implicit add more padding to the bottom
                 if (j == implicitMods.length() - 1) {
-                    iTest.setPadding(10, 0, 15, 5);
+                    iTest.setPadding(10, 0, 15, 10);
 
                 }
 
@@ -259,7 +260,7 @@ public class EquipCustomListAdapter extends ArrayAdapter {
                 TextView iTest = new TextView(context);
                 try {
                     iTest.setText(explicitMods.get(j).toString());
-                    iTest.setPadding(15, 0, 15, 0);
+                    iTest.setPadding(10, 0, 15, 0);
                     iTest.setTextColor(ContextCompat.getColor(context, R.color.itemTextBlue));
                 } catch (JSONException e) {
                     Log.d("json", "Error: " + e);
@@ -284,7 +285,7 @@ public class EquipCustomListAdapter extends ArrayAdapter {
                 TextView iTest = new TextView(context);
                 try {
                     iTest.setText(craftMods.get(j).toString());
-                    iTest.setPadding(15, 0, 15, 0);
+                    iTest.setPadding(10, 0, 15, 0);
                     iTest.setTextColor(ContextCompat.getColor(context, R.color.enchantBlue));
                 } catch (JSONException e) {
                     Log.d("json", "Error: " + e);
