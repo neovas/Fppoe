@@ -29,6 +29,7 @@
         android:background="@color/spinnerbg"
         android:iconifiedByDefault="false"
         android:queryHint="Account"
+        android:queryBackground="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="@+id/leagueSpinner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/leagueSpinner"

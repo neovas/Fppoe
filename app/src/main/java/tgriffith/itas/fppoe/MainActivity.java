@@ -294,13 +294,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Make the entire area of the searchView clickable rather than just the magnifying glass.
-        searchView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchView.setIconified(false);
-            }
-        });
+
 
         // On click of item start CharacterInfo activity.
         // Pass the accountName and characterName so we can call api to get detailed info on the
@@ -308,7 +302,8 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                // if searchView has been focused clear it
+                searchView.clearFocus();
                 requestCharInfo(position);
 
             }
