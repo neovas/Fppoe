@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Currently running leagues
         String[] leagueChoices = new String[]{
+                "Harvest", "Hardcore Harvest", "SSF Harvest", "SSF Harvest HC",
                 "Delirium", "Hardcore Delirium", "SSF Delirium", "SSF Delirium HC",
                 "Standard", "Hardcore", "SSF Standard", "SSF Hardcore"
         };
